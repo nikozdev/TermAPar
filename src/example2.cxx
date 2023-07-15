@@ -1,22 +1,24 @@
 #include <iostream>
 #include "lTermArgs.hxx"
 
-using namespace args;
-using namespace std;
-
-void callback(string cmd_name, ArgParser& cmd_parser) {
-    cout << "---------- boo! ----------\n";
-    cmd_parser.print();
-    cout << "--------------------------\n\n";
+void callback(std::string cmd_name, nTermArgs::ArgParser &cmd_parser)
+{
+	std::cout << "---------- boo! ----------\n";
+	cmd_parser.print();
+	std::cout << "--------------------------\n\n";
 }
 
-int main(int argc, char **argv) {
-    ArgParser parser("Usage: example...", "1.0");
+int main(int argc, char **argv)
+{
+	nTermArgs::ArgParser parser("Usage: example...", "1.0");
 
-    ArgParser& cmd_parser = parser.command("boo", "Usage: example boo...", callback);
-    cmd_parser.flag("foo f");
-    cmd_parser.option("bar b", "default");
+	nTermArgs::ArgParser &cmd_parser
+		= parser.command("boo", "Usage: example boo...", callback);
+	cmd_parser.flag("foo f");
+	cmd_parser.option("bar b", "default");
 
-    parser.parse(argc, argv);
-    parser.print();
+	parser.parse(argc, argv);
+	parser.print();
+
+	return 0;
 }
