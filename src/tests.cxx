@@ -5,7 +5,7 @@
 #include <cassert>
 #include <vector>
 #include <string>
-#include "args.h"
+#include "lTermArgs.hxx"
 
 using namespace std;
 using namespace args;
