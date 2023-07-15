@@ -6,8 +6,8 @@
 // Version: 2.1.0
 // -----------------------------------------------------------------------------
 
-#ifndef args_h
-#define args_h
+#ifndef dTermArgsHxx
+#define dTermArgsHxx
 
 #include <map>
 #include <string>
@@ -85,4 +85,4 @@ class ArgParser
 };
 } // namespace args
 
-#endif
+#endif // dTermArgsHxx
