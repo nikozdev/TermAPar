@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 # proj
 project(lTermArgs
-    VERSION 1.0.0
+    VERSION 1.1.0
     DESCRIPTION "command line argument parser library for cxx"
     ) # project
 set(vProjName ${PROJECT_NAME})
