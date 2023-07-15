@@ -13,74 +13,76 @@
 #include <string>
 #include <vector>
 
-namespace args {
+namespace args
+{
 
-    struct ArgStream;
-    struct Option;
-    struct Flag;
+struct ArgStream;
+struct Option;
+struct Flag;
 
-    class ArgParser {
-        public:
-            ArgParser(
-                std::string const& helptext = "",
-                std::string const& version = ""
-            ) : helptext(helptext), version(version) {}
+class ArgParser
+{
+  public:
+	ArgParser(const std::string &helptext = "", const std::string &version = "")
+		: helptext(helptext), version(version)
+	{
+	}
 
-            ~ArgParser();
+	~ArgParser();
 
-            // Stores positional arguments.
-            std::vector<std::string> args;
+	// Stores positional arguments.
+	std::vector<std::string> args;
 
-            // Application/command help text and version strings.
-            std::string helptext;
-            std::string version;
+	// Application/command help text and version strings.
+	std::string helptext;
+	std::string version;
 
-            // Callback function for command parsers.
-            void (*callback)(std::string cmd_name, ArgParser& cmd_parser);
+	// Callback function for command parsers.
+	void (*callback)(std::string cmd_name, ArgParser &cmd_parser);
 
-            // Register flags and options.
-            void flag(std::string const& name);
-            void option(std::string const& name, std::string const& fallback = "");
+	// Register flags and options.
+	void flag(const std::string &name);
+	void option(const std::string &name, const std::string &fallback = "");
 
-            // Parse the application's command line arguments.
-            void parse(int argc, char **argv);
-            void parse(std::vector<std::string> args);
+	// Parse the application's command line arguments.
+	void parse(int argc, char **argv);
+	void parse(std::vector<std::string> args);
 
-            // Retrieve flag and option values.
-            bool found(std::string const& name);
-            int count(std::string const& name);
-            std::string value(std::string const& name);
-            std::vector<std::string> values(std::string const& name);
+	// Retrieve flag and option values.
+	bool					 found(const std::string &name);
+	int						 count(const std::string &name);
+	std::string				 value(const std::string &name);
+	std::vector<std::string> values(const std::string &name);
 
-            // Register a command. Returns the command's ArgParser instance.
-            ArgParser& command(
-                std::string const& name,
-                std::string const& helptext = "",
-                void (*callback)(std::string cmd_name, ArgParser& cmd_parser) = nullptr
-            );
+	// Register a command. Returns the command's ArgParser instance.
+	ArgParser &command(
+		const std::string &name,
+		const std::string &helptext									  = "",
+		void (*callback)(std::string cmd_name, ArgParser &cmd_parser) = nullptr
+	);
 
-            // Utilities for handling commands manually.
-            bool commandFound();
-            std::string commandName();
-            ArgParser& commandParser();
+	// Utilities for handling commands manually.
+	bool		commandFound();
+	std::string commandName();
+	ArgParser  &commandParser();
 
-            // Print a parser instance to stdout.
-            void print();
+	// Print a parser instance to stdout.
+	void print();
+  private:
+	std::map<std::string, Option *>	   options;
+	std::map<std::string, Flag *>	   flags;
+	std::map<std::string, ArgParser *> commands;
+	std::string						   command_name;
 
-        private:
-            std::map<std::string, Option*> options;
-            std::map<std::string, Flag*> flags;
-            std::map<std::string, ArgParser*> commands;
-            std::string command_name;
-
-            void parse(ArgStream& args);
-            void registerOption(std::string const& name, Option* option);
-            void parseLongOption(std::string arg, ArgStream& stream);
-            void parseShortOption(std::string arg, ArgStream& stream);
-            void parseEqualsOption(std::string prefix, std::string name, std::string value);
-            void exitHelp();
-            void exitVersion();
-    };
-}
+	void parse(ArgStream &args);
+	void registerOption(const std::string &name, Option *option);
+	void parseLongOption(std::string arg, ArgStream &stream);
+	void parseShortOption(std::string arg, ArgStream &stream);
+	void
+	parseEqualsOption(std::string prefix, std::string name, std::string value);
+	void exitHelp();
+	void exitVersion();
+};
+} // namespace args
 
 #endif
