@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 # proj
 project(lTermArgs
-    VERSION 1.1.0
+    VERSION 1.2.0
     DESCRIPTION "command line argument parser library for cxx"
     ) # project
 set(vProjName ${PROJECT_NAME})
@@ -21,6 +21,7 @@ add_library(${vProjName}
 target_compile_options(${vProjName} PRIVATE
     -Wno-format
     ) # target_compile_options
+if(1)
 add_executable(tests
     ${vFileDirSrc}/tests.cxx
     ) # add_executable
@@ -39,3 +40,4 @@ add_executable(example2
 target_link_libraries(example2 PRIVATE
     ${vProjName}
     ) # target_link_libraries
+endif(0)
