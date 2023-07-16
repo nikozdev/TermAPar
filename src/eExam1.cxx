@@ -1,8 +1,11 @@
+#ifndef lTermArgsExam1Cxx
+#define lTermArgsExam1Cxx
+// headers
 #include "lTermArgs.hxx"
-
+// actions
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tParser vParser("Usage: example...", "1.0");
+	nTermArgs::tParser vParser;
 
 	vParser.fRegFlag("foo f");
 	vParser.fRegOpt("bar b", "default");
@@ -11,4 +14,5 @@ int main(int vArgC, char **vArgV)
 	vParser.fPrint();
 
 	return 0;
-}
+} // main
+#endif // lTermArgsExam1Cxx

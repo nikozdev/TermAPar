@@ -2,20 +2,32 @@
 #define lTermArgsTestCxx
 // headers
 #include <cassert>
-#include <vector>
-#include <string>
 #include "lTermArgs.hxx"
 // defines
-#define dPrintPrefix()                                      \
-	({                                                      \
-		printf("%s[%s]=(\n", &vOffsetStr[0], __FUNCTION__); \
-		vOffsetStr[vOffsetNum++] = ' ';                     \
+#define dPrintPrefix()                                         \
+	({                                                         \
+		std::printf("%s[%s]=(", &vOffsetStr[0], __FUNCTION__); \
+		std::printf("\n");                                     \
+		vOffsetStr[vOffsetNum++] = ' ';                        \
 	}) // dPrintPrefix
-#define dPrintSuffix()                                      \
-	({                                                      \
-		vOffsetStr[--vOffsetNum] = '\0';                    \
-		printf("%s)=[%s]\n", &vOffsetStr[0], __FUNCTION__); \
+#define dPrintSuffix()                                         \
+	({                                                         \
+		vOffsetStr[--vOffsetNum] = '\0';                       \
+		std::printf("%s)=[%s]", &vOffsetStr[0], __FUNCTION__); \
+		std::printf("\n");                                     \
 	}) // dPrintSuffix
+#define dPrintAssert(dExpr)                                        \
+	({                                                             \
+		std::printf("%s[%s]=(%d)", &vOffsetStr[0], #dExpr, dExpr); \
+		std::printf("\n");                                         \
+		assert(dExpr);                                             \
+	}) // dPrintAssert
+#define dPrintBlock(dBlock)                                             \
+	({                                                                  \
+		std::printf("%s[Block]=(%s)=[Block]", &vOffsetStr[0], #dBlock); \
+		std::printf("\n");                                              \
+		dBlock;                                                         \
+	}) // dPrintBlock
 // datadef
 static char vOffsetStr[0xff];
 static int	vOffsetNum = 0;
@@ -25,60 +37,72 @@ void fTestFlagEmptyInput()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegFlag("foo f");
-	vParser.fParse({});
-	assert(vParser.fVetArg("foo") == false);
-	assert(vParser.fGetArgCount("foo") == 0);
+	dPrintBlock({
+		vParser.fRegFlag("foo f");
+		vParser.fParse({});
+	});
+	dPrintAssert(vParser.fVetArg("foo") == false);
+	dPrintAssert(vParser.fGetArgCount("foo") == 0);
 	dPrintSuffix();
 } // fTestFlagEmptyInput
 void fTestFlagNotFound()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegFlag("foo f");
-	vParser.fParse({ "abc", "def" });
-	assert(vParser.fVetArg("foo") == false);
-	assert(vParser.fGetArgCount("foo") == 0);
+	dPrintBlock({
+		vParser.fRegFlag("foo f");
+		vParser.fParse({ "abc", "def" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == false);
+	dPrintAssert(vParser.fGetArgCount("foo") == 0);
 	dPrintSuffix();
 } // fTestFlagNotFound
 void fTestFlagL()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegFlag("foo f");
-	vParser.fParse({ "--foo" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 1);
+	dPrintBlock({
+		vParser.fRegFlag("foo f");
+		vParser.fParse({ "--foo" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 1);
 	dPrintSuffix();
 } // fTestFlagL
 void fTestFlagS()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegFlag("foo f");
-	vParser.fParse({ "-f" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 1);
+	dPrintBlock({
+		vParser.fRegFlag("foo f");
+		vParser.fParse({ "-f" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 1);
 	dPrintSuffix();
 } // fTestFlagS
 void fTestFlagCondense()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegFlag("foo f");
-	vParser.fParse({ "-fff" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 3);
+	dPrintBlock({
+		vParser.fRegFlag("foo f");
+		vParser.fParse({ "-fff" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 3);
 	dPrintSuffix();
 } // fTestFlagCondense
 void fTestFlagMultiple()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegFlag("foo f");
-	vParser.fParse({ "-fff", "--foo", "-f" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 5);
+	dPrintBlock({
+		vParser.fRegFlag("foo f");
+		vParser.fParse({ "-fff", "--foo", "-f" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 5);
 	dPrintSuffix();
 } // fTestFlagMultiple
 void fTestFlag()
@@ -97,63 +121,73 @@ void fTestOptNotFound()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegOpt("foo f", "default");
-	vParser.fParse({ "abc", "def" });
-	assert(vParser.fVetArg("foo") == false);
-	assert(vParser.fGetArgCount("foo") == 0);
-	assert(vParser.fGetOpt("foo") == "default");
+	dPrintBlock({
+		vParser.fRegOpt("foo f", "default");
+		vParser.fParse({ "abc", "def" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == false);
+	dPrintAssert(vParser.fGetArgCount("foo") == 0);
+	dPrintAssert(vParser.fGetOpt("foo") == "default");
 	dPrintSuffix();
 } // fTestOptNotFound
 void fTestOptL()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegOpt("foo f", "default");
-	vParser.fParse({ "--foo", "bar" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 1);
-	assert(vParser.fGetOpt("foo") == "bar");
+	dPrintBlock({
+		vParser.fRegOpt("foo f", "default");
+		vParser.fParse({ "--foo", "bar" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 1);
+	dPrintAssert(vParser.fGetOpt("foo") == "bar");
 	dPrintSuffix();
 } // fTestOptL
 void fTestOptS()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegOpt("foo f", "default");
-	vParser.fParse({ "-f", "bar" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 1);
-	assert(vParser.fGetOpt("foo") == "bar");
+	dPrintBlock({
+		vParser.fRegOpt("foo f", "default");
+		vParser.fParse({ "-f", "bar" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 1);
+	dPrintAssert(vParser.fGetOpt("foo") == "bar");
 	dPrintSuffix();
 } // fTestOptS
 void fTestOptCondense()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegOpt("foo f", "default");
-	vParser.fParse({ "-ff", "bar", "baz" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 2);
-	assert(vParser.fGetOpt("foo") == "baz");
+	dPrintBlock({
+		vParser.fRegOpt("foo f", "default");
+		vParser.fParse({ "-ff", "bar", "baz" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 2);
+	dPrintAssert(vParser.fGetOpt("foo") == "baz");
 	dPrintSuffix();
 } // fTestOptCondense
 void fTestOptMultiple()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fRegOpt("foo f", "default");
-	vParser.fParse({ "-ff", "bar", "baz", "--foo", "bam" });
-	assert(vParser.fVetArg("foo") == true);
-	assert(vParser.fGetArgCount("foo") == 3);
-	assert(vParser.fGetOpt("foo") == "bam");
+	dPrintBlock({
+		vParser.fRegOpt("foo f", "default");
+		vParser.fParse({ "-ff", "bar", "baz", "--foo", "bam" });
+	});
+	dPrintAssert(vParser.fVetArg("foo") == true);
+	dPrintAssert(vParser.fGetArgCount("foo") == 3);
+	dPrintAssert(vParser.fGetOpt("foo") == "bam");
 	dPrintSuffix();
 } // fTestOptMultiple
 void fTestOptParseSwitch()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fParse({ "foo", "--", "--bar", "--baz" });
-	assert(vParser.vArgPak.size() == 3);
+	dPrintBlock({ vParser.fParse({ "foo", "--", "--bar", "--baz" }); });
+	dPrintAssert(vParser.vArgPak.size() == 3);
 	dPrintSuffix();
 } // fTestOptParseSwitch
 void fTestOpt()
@@ -172,10 +206,10 @@ void fTestArgPak()
 {
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
-	vParser.fParse({ "abc", "def" });
-	assert(vParser.vArgPak.size() == 2);
-	assert(vParser.vArgPak[0] == "abc");
-	assert(vParser.vArgPak[1] == "def");
+	dPrintBlock({ vParser.fParse({ "abc", "def" }); });
+	dPrintAssert(vParser.vArgPak.size() == 2);
+	dPrintAssert(vParser.vArgPak[0] == "abc");
+	dPrintAssert(vParser.vArgPak[1] == "def");
 	dPrintSuffix();
 } // fTestArgPak
 void fTestArg()
@@ -190,20 +224,21 @@ void fTestCmd()
 	dPrintPrefix();
 	nTermArgs::tParser	vParser;
 	nTermArgs::tParser &rParserCmd = vParser.fRegCmd("boo");
-	rParserCmd.fRegFlag("foo");
-	rParserCmd.fRegOpt("bar", "default");
-	vParser.fParse({ "boo", "abc", "def", "--foo", "--bar", "baz" });
-	assert(vParser.fVetCmd());
-	assert(vParser.fGetCmdKey() == "boo");
-	assert(rParserCmd.vArgPak.size() == 2);
-	assert(rParserCmd.fVetArg("foo"));
-	assert(rParserCmd.fGetOpt("bar") == "baz");
+	dPrintBlock({
+		rParserCmd.fRegFlag("foo");
+		rParserCmd.fRegOpt("bar", "default");
+		vParser.fParse({ "boo", "abc", "def", "--foo", "--bar", "baz" });
+	});
+	dPrintAssert(vParser.fVetCmd());
+	dPrintAssert(vParser.fGetCmdKey() == "boo");
+	dPrintAssert(rParserCmd.vArgPak.size() == 2);
+	dPrintAssert(rParserCmd.fVetArg("foo"));
+	dPrintAssert(rParserCmd.fGetOpt("bar") == "baz");
 	dPrintSuffix();
 } // fTestCmd
 // // main
 int fTest()
 {
-	std::setbuf(stdout, NULL);
 	dPrintPrefix();
 	fTestFlag();
 	fTestOpt();
@@ -211,9 +246,9 @@ int fTest()
 	fTestCmd();
 	dPrintSuffix();
 	return 0;
-}
+} // fTest
 int main()
 {
 	return fTest();
-}
-#endif // lTermArgs
+} // main
+#endif // lTermArgsTestCxx

@@ -7,7 +7,6 @@
 #include <map>
 #include <vector>
 #include <deque>
-#include <set>
 
 #include <string>
 #include <iostream>
@@ -80,39 +79,9 @@ typedef class tParser
   public: // typedef
 	typedef void(tCallback)(const tKey &vCmdKey, tParser &rParser);
   public: // codetor
-	tParser(const tStr &vHelpText = "", const tStr &vVnumText = "")
-		: vHelpText(vHelpText), vVnumText(vVnumText)
-	{
-	} // tParser
+	tParser() = default;
 	~tParser()
 	{
-		std::set<tParser *> vCmdSet;
-		for(auto &r: vCmdTab)
-		{
-			vCmdSet.insert(r.second);
-		}
-		for(auto *p: vCmdSet)
-		{
-			delete p;
-		}
-		std::set<tOption *> vOptSet;
-		for(auto &r: vOptTab)
-		{
-			vOptSet.insert(r.second);
-		}
-		for(auto *p: vOptSet)
-		{
-			delete p;
-		}
-		std::set<tFlag *> vFlagSet;
-		for(auto &r: vFlagTab)
-		{
-			vFlagSet.insert(r.second);
-		}
-		for(auto *p: vFlagSet)
-		{
-			delete p;
-		}
 	}	  // ~tParser
   public: // getters
 	auto fGetCmdKey() const
@@ -181,12 +150,20 @@ typedef class tParser
 		return 0;
 	}	  // fVetArg
   public: // setters
-	auto &fRegCmd(
-		const tKey &rKey, const tStr &rHelpText = "", tCallback *pCallback = nullptr
-	)
+	auto &fSetHelpText(const tStr &rHelpText)
 	{
-		tParser *pParser   = new tParser();
-		pParser->vHelpText = rHelpText;
+		this->vHelpText = rHelpText;
+		return *this;
+	}
+	auto &fSetCallback(tCallback *pCallback)
+	{
+		this->pCallback = pCallback;
+		return *this;
+	}
+	auto &fRegCmd(const tKey &rKey)
+	{
+		this->vCmdPak.push_back(tParser{});
+		tParser *pParser   = &this->vCmdPak.back();
 		pParser->pCallback = pCallback;
 		tStrStream vStream(rKey);
 		tStr	   vAlias;
@@ -198,7 +175,8 @@ typedef class tParser
 	}
 	auto &fRegOpt(const tKey &rKey, const tStr &rDef = "")
 	{
-		tOption *pOption = new tOption();
+		this->vOptPak.push_back(tOption{});
+		tOption *pOption = &this->vOptPak.back();
 		pOption->vDef	 = rDef;
 		tStrStream vStream(rKey);
 		tStr	   vAlias;
@@ -210,7 +188,8 @@ typedef class tParser
 	} // fRegOpt
 	auto &fRegFlag(const tKey &rKey)
 	{
-		tFlag	  *pFlag = new tFlag();
+		this->vFlagPak.push_back(tFlag{});
+		tFlag	  *pFlag = &this->vFlagPak.back();
 		tStrStream vStream(rKey);
 		tStr	   vAlias;
 		while(vStream >> vAlias)
@@ -225,11 +204,6 @@ typedef class tParser
 		std::cout << this->vHelpText << std::endl;
 		return exit(vCode);
 	} // fExitHelp
-	auto fExitVnum(int vCode = 0)
-	{
-		std::cout << this->vVnumText << std::endl;
-		return exit(vCode);
-	} // fExitVnum
 	bool fParseOptE(const tArg &rPfx, const tKey &rKey, const tArg &rArg)
 	{
 		if(this->vOptTab.count(rKey))
@@ -290,11 +264,6 @@ typedef class tParser
 			this->fExitHelp(0);
 			return 1;
 		}
-		if(rArg == "vnum" && this->vVnumText != "")
-		{
-			this->fExitVnum(0);
-			return 1;
-		}
 		std::cerr
 			<< "Error: --" << rArg << " is not a recognised flag or option"
 			<< std::endl;
@@ -346,11 +315,6 @@ typedef class tParser
 			if(rIter == 'h' && this->vHelpText != "")
 			{
 				this->fExitHelp(0);
-				return 1;
-			}
-			if(rIter == 'v' && this->vVnumText != "")
-			{
-				this->fExitVnum(0);
 				return 1;
 			}
 			if(rArg.size() > 1)
@@ -540,12 +504,14 @@ typedef class tParser
   public: // datadef
 	tPak	   vArgPak;
 	tStr	   vHelpText;
-	tStr	   vVnumText;
 	tCallback *pCallback;
   private: // datadef
 	tKey					  vCmdKey;
+	std::vector<tParser>	  vCmdPak;
 	std::map<tKey, tParser *> vCmdTab;
+	std::vector<tOption>	  vOptPak;
 	std::map<tKey, tOption *> vOptTab;
+	std::vector<tFlag>		  vFlagPak;
 	std::map<tKey, tFlag *>	  vFlagTab;
 } tParser;
 
