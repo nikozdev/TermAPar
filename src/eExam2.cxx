@@ -1,21 +1,23 @@
-#include <iostream>
+#ifndef lTermArgsExam2Cxx
+#define lTermArgsExam2Cxx
+// headers
 #include "lTermArgs.hxx"
-
-static void fCallback(const nTermArgs::tKey &rKey, nTermArgs::tParser &rParser)
+// actions
+static void fCallback(const nTermArgs::tKey &rKey, nTermArgs::tCmd &rCmd)
 {
-	std::cout << "---------- boo! ----------" << std::endl;
-	rParser.fPrint();
-	std::cout << "--------------------------" << std::endl << std::endl;
+	rCmd.fPrint();
 }
-
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tParser	vParser{ "Usage: example...", "1.0" };
-	nTermArgs::tParser &rParserCmd
-		= vParser.fRegCmd("boo", "Usage: example boo...", fCallback);
-	rParserCmd.fRegFlag("foo f");
-	rParserCmd.fRegOpt("bar b foo f", "default");
-	vParser.fParse(vArgC, vArgV);
-	vParser.fPrint();
+	nTermArgs::tCmd	   vCmd;
+	nTermArgs::tCmdPtr pCmd = vCmd.fSetCmd("boo");
+	pCmd->fSetCallback(fCallback);
+	pCmd->fSetOpt("foo f", "none");
+	pCmd->fSetOpt("bar b foo f", "default");
+	vCmd.fSetOpt("var v", "none");
+	vCmd.fSetOpt("bar b", "default");
+	vCmd.fParse(vArgC, vArgV);
+	vCmd.fPrint();
 	return 0;
 }
+#endif // lTermArgsExam2Cxx
