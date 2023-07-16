@@ -7,7 +7,7 @@ IndentWidth:                       4
 PPIndentWidth:                    -1 # for -1 - use IndentWidth
 ContinuationIndentWidth:           4
 ConstructorInitializerIndentWidth: 4
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignAfterOpenBracket:  BlockIndent
 AlignArrayOfStructures: Left
 AlignEscapedNewlines:   Left
