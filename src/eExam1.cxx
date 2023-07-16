@@ -5,14 +5,11 @@
 // actions
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tParser vParser;
-
-	vParser.fRegFlag("foo f");
-	vParser.fRegOpt("bar b", "default");
-
-	vParser.fParse(vArgC, vArgV);
-	vParser.fPrint();
-
+	nTermArgs::tCmd vCmd;
+	vCmd.fSetOpt("foo f", "none");
+	vCmd.fSetOpt("bar b", "default");
+	vCmd.fParse(vArgC, vArgV);
+	vCmd.fPrint();
 	return 0;
 } // main
 #endif // lTermArgsExam1Cxx

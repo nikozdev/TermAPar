@@ -6,10 +6,10 @@
 // actions
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tParser vParser;
-	vParser.fRegOpt("config-file config-path config-file-path");
-	vParser.fParse(vArgC, vArgV);
-	vParser.fPrint();
+	nTermArgs::tCmd vCmd;
+	vCmd.fSetOpt("config-file config-path config-file-path");
+	vCmd.fParse(vArgC, vArgV);
+	vCmd.fPrint();
 	return 0;
 } // main
 #endif // lTermArgsExam3Cxx

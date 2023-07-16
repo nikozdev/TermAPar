@@ -40,116 +40,103 @@ using tStr		 = std::string;
 using tStrStream = std::stringstream;
 
 using tArg = tStr;
-using tKey = tStr;
-using tPak = std::vector<tArg>;
+using tKey = tArg;
+using tOpt = tArg;
+using tArr = std::vector<tArg>;
 
-typedef struct tStream
+typedef struct tArgStream
 {
+public: // codetor
+	tArgStream() = default;
+	template<typename... tArgPack>
+	tArgStream(tArgPack &&...vArgPack): vArgQueue{vArgPack...}
+	{
+	}
 public: // setters
-	void fAppend(const tArg &vArg)
+	void fAdd(const tArg &vArg)
 	{
-		this->vPak.push_back(vArg);
-	}	// fAppend
+		this->vArgQueue.push_back(vArg);
+	}	// fAdd
 public: // getters
-	tArg fPopNext()
+	tArg fPop()
 	{
-		tArg vArg = this->vPak.front();
-		this->vPak.pop_front();
+		tArg vArg = this->vArgQueue.front();
+		this->vArgQueue.pop_front();
 		return vArg;
-	}	// fPopNext
+	}	// fPop
 public: // vetters
-	bool fVetNext()
+	bool fVet()
 	{
-		return this->vPak.size();
-	}	// fVetNext
-public: // datadef
-	std::deque<tArg> vPak;
-} tStream;
-typedef struct tOption
-{
-public: // datadef
-	tPak vPak;
-	tArg vDef;
-} tOption;
-typedef struct tFlag
-{
-	int vCount = 0;
-} tFlag;
-typedef class tParser
+		return this->vArgQueue.size();
+	}	 // fVet
+private: // datadef
+	std::deque<tArg> vArgQueue;
+} tArgStream; // argument stream type
+typedef class tCmd
 {
 public: // typedef
-	typedef void(tCallback)(const tKey &rCmdKey, tParser &rParser);
-	using tParserPtr = std::shared_ptr<tParser>;
-	using tOptionPtr = std::shared_ptr<tOption>;
-	using tFlagPtr	 = std::shared_ptr<tFlag>;
+	typedef void(tCallback)(const tKey &rKey, tCmd &rCmd);
+	using tCmdPtr = std::shared_ptr<tCmd>;
+	using tOptPtr = std::shared_ptr<tOpt>;
 public: // codetor
-	tParser() = default;
-	~tParser()
-	{
-		std::printf("DELETE\n");
-	}	// ~tParser
+	tCmd()	= default;
+	~tCmd() = default;
 public: // getters
-	auto fGetArgPak() const
+	tCmdPtr fGetCmdPtr(const tKey &rKey) const
 	{
-		return this->vArgPak;
-	} // fGetArgPak
-	auto fGetOptCount(const tKey &rKey)
+		auto rI = this->vCmdTab.find(rKey);
+		return (rI == this->vCmdTab.end()) ? rI->second : tCmdPtr{};
+	} // fGetCmdPtr
+	tOptPtr fGetOptPtr(const tKey &rKey) const
 	{
-		if(this->vOptTab.count(rKey))
-		{
-			return static_cast<unsigned>(this->vOptTab[rKey]->vPak.size());
-		}
-		return 0u;
-	} // fGetOptCount
-	auto fGetFlagCount(const tKey &rKey)
+		auto rI = this->vOptTab.find(rKey);
+		return (rI == this->vOptTab.end()) ? rI->second : tOptPtr{};
+	} // fGetOptPtr
+	tOpt fGetOptVal(const tKey &rKey) const
 	{
-		if(this->vFlagTab.count(rKey))
-		{
-			return static_cast<unsigned>(this->vFlagTab[rKey]->vCount);
-		}
-		return 0u;
-	} // fGetFlagCount
-	auto fGetOptArray(const tKey &rKey)
+		return this->fVetOptKey(rKey) ? *this->vOptTab.find(rKey)->second : tOpt{};
+	} // fGetOptVal
+	auto fGetArgVal(const size_t vKey) const
 	{
-		if(this->vOptTab.count(rKey))
-		{
-			return this->vOptTab[rKey]->vPak;
-		}
-		return tPak{};
-	} // fGetArgArray
-	auto fGetOpt(const tKey &rKey)
+		return this->vArgArr[vKey];
+	} // fGetArgVal
+	auto fGetArgArr() const
 	{
-		if(this->vOptTab.count(rKey))
-		{
-			if(this->vOptTab[rKey]->vPak.size())
-			{
-				return this->vOptTab[rKey]->vPak.back();
-			}
-			return this->vOptTab[rKey]->vDef;
-		}
-		return tArg{};
-	} // fGetOpt
-	auto fGetCmd(const tKey &rKey)
-	{
-		return *this->vCmdTab[rKey];
-	}	// fGetCmdParser
+		return this->vArgArr;
+	}	// fGetArgArr
 public: // vetters
-	bool fVetCmd(const tKey &rKey) const
+	bool fVetCmdTab(const bool vVet = 1) const
 	{
-		return this->vCmdTab.count(rKey);
-	} // fVetCmd
-	bool fVetOpt(const tKey &rKey) const
+		return this->vCmdTab.empty() != vVet;
+	} // fVetCmdTab
+	bool fVetCmdKey(const tKey &rKey, const bool vVet = 1) const
 	{
-		return this->vOptTab.count(rKey);
-	} // fVetCmd
-	bool fVetFlag(const tKey &rKey) const
+		return (this->vCmdTab.find(rKey) != this->vCmdTab.end()) == vVet;
+	} // fVetCmdKey
+	bool fVetOptTab(const bool vVet = 1) const
 	{
-		return this->vFlagTab.count(rKey);
-	} // fVetFlag
-	bool fVetArg(const size_t vKey) const
+		return this->vOptTab.empty() != vVet;
+	} // fVetOptTab
+	bool fVetOptKey(const tKey &rKey, const bool vSet = 1) const
 	{
-		return this->vArgPak.size() > vKey;
-	}	// fVetArg
+		return (this->vOptTab.find(rKey) != this->vOptTab.end()) == vSet;
+	} // fVetOptKey
+	bool
+	fVetOptVal(const tKey &rKey, const tOpt &rOpt, const bool vVet = 1) const
+	{
+		auto  rI   = this->vOptTab.find(rKey);
+		auto &rPtr = (rI->second);
+		return (rI == this->vOptTab.end() ? 0 : (*rPtr == rOpt)) == vVet;
+	} // fVetOptVal
+	bool fVetArgArr(size_t count, const bool vVet = 1) const
+	{
+		return (this->vArgArr.size() >= count) == vVet;
+	}
+	bool fVetArgVal(const tArg &rArg) const
+	{
+		return std::find(this->vArgArr.begin(), this->vArgArr.end(), rArg)
+			!= this->vArgArr.end();
+	}	// fVetArgVal
 public: // setters
 	auto &fSetHelpText(const tStr &rHelpText)
 	{
@@ -161,40 +148,29 @@ public: // setters
 		this->pCallback = pCallback;
 		return *this;
 	} // fSetCallback
-	auto fRegCmd(const tKey &rKey)
+	auto fSetCmd(const tKey &rKey, tCallback *pCallback = nullptr)
 	{
-		tParserPtr pParser = std::make_shared<tParser>();
+		tCmdPtr pCmd = std::make_shared<tCmd>();
+		pCmd->fSetCallback(pCallback);
 		tStrStream vStream(rKey);
-		tStr	   vAlias;
-		while(vStream >> vAlias)
+		tStr	   vKey;
+		while(vStream >> vKey)
 		{
-			this->vCmdTab[vAlias] = pParser;
+			this->vCmdTab[vKey] = pCmd;
 		}
-		return pParser;
-	}
-	auto fRegOpt(const tKey &rKey, const tStr &rDef = "")
+		return pCmd;
+	} // fSetCmd
+	auto fSetOpt(const tKey &rKey, const tStr &rDef = "")
 	{
-		tOptionPtr pOption = std::make_shared<tOption>();
-		pOption->vDef	   = rDef;
+		tOptPtr	   pOpt = std::make_shared<tOpt>(rDef);
 		tStrStream vStream(rKey);
-		tStr	   vAlias;
-		while(vStream >> vAlias)
+		tStr	   vKey;
+		while(vStream >> vKey)
 		{
-			this->vOptTab[vAlias] = pOption;
+			this->vOptTab[vKey] = pOpt;
 		}
-		return pOption;
-	} // fRegOpt
-	auto fRegFlag(const tKey &rKey)
-	{
-		tFlagPtr   pFlag = std::make_shared<tFlag>();
-		tStrStream vStream(rKey);
-		tStr	   vAlias;
-		while(vStream >> vAlias)
-		{
-			this->vFlagTab[vAlias] = pFlag;
-		}
-		return pFlag;
-	}	 // fRegFlag
+		return pOpt;
+	}	 // fSetOpt
 private: // actions
 	auto fExitHelp(int vCode = 0)
 	{
@@ -203,92 +179,86 @@ private: // actions
 	} // fExitHelp
 	bool fParseOptE(const tArg &rPfx, const tKey &rKey, const tArg &rArg)
 	{
-		if(this->vOptTab.count(rKey))
+		if(this->fVetOptKey(rKey))
 		{
-			if(rArg.size())
-			{
-				this->vOptTab[rKey]->vPak.push_back(rArg);
-			}
-			else
+			if(rArg.empty())
 			{
 				std::cerr
-					<< "Error: missing value for " << rPfx << rKey << std::endl;
+					<< "missing value for " << rPfx << rKey << ";" << __LINE__
+					<< std::endl;
 				this->fExitHelp(1);
 				return 0;
 			}
-		}
+			else
+			{
+				*this->vOptTab[rKey] = rArg;
+			}
+		} // found option
 		else
 		{
 			std::cerr
-				<< "Error: " << rPfx << rKey << " is not a recognised option"
+				<< rPfx << rKey << " - is not an option;" << __LINE__
 				<< std::endl;
 			this->fExitHelp(1);
 			return 0;
-		}
+		} // not an option
 		return 1;
 	} // fParseOptE
-	bool fParseOptL(const tArg &rArg, tStream &rStream)
+	bool fParseOptL(const tArg &rArg, tArgStream &rArgStream)
 	{
-		size_t vPos = rArg.find("=");
-		if(vPos != std::string::npos)
+		if(size_t vPos = rArg.find("="); vPos != std::string::npos)
 		{
 			tKey vKey = rArg.substr(0, vPos);
-			tArg vVal = rArg.substr(vPos + 1);
-			this->fParseOptE("--", vKey, vVal);
-			return 1;
-		}
-		if(this->vFlagTab.count(rArg))
+			tArg vArg = rArg.substr(vPos + 1);
+			return this->fParseOptE("--", vKey, vArg);
+		} // --opt=val
+		else if(this->fVetOptKey(rArg))
 		{
-			this->vFlagTab[rArg]->vCount++;
-			return 1;
-		}
-		if(vOptTab.count(rArg))
-		{
-			if(rStream.fVetNext())
+			if(rArgStream.fVet())
 			{
-				this->vOptTab[rArg]->vPak.push_back(rStream.fPopNext());
+				*this->vOptTab[rArg] = rArgStream.fPop();
 				return 1;
 			}
 			else
 			{
-				std::cerr << "Error: missing argument for --" << rArg << std::endl;
+				std::cerr
+					<< "missing argument for --" << rArg << ";" << __LINE__
+					<< std::endl;
 				this->fExitHelp(1);
 				return 0;
 			}
-		}
-		if(rArg == "help" && this->vHelpText != "")
+		} // found option
+		else if(rArg == "help" && this->vHelpText != "")
 		{
 			this->fExitHelp(0);
 			return 1;
-		}
-		std::cerr
-			<< "Error: --" << rArg << " is not a recognised flag or option"
-			<< std::endl;
-		this->fExitHelp(1);
+		} // no option found - try the default help option
+		else
+		{
+			std::cerr
+				<< "--" << rArg << " - is not an option;" << __LINE__
+				<< std::endl;
+			this->fExitHelp(1);
+			return 0;
+		} // not an option
 		return 0;
 	} // fParseOptL
-	bool fParseOptS(const tArg &rArg, tStream &rStream)
+	bool fParseOptS(const tArg &rArg, tArgStream &rArgStream)
 	{
-		size_t vPos = rArg.find("=");
-		if(vPos != tStr::npos)
+		if(size_t vPos = rArg.find("="); vPos != tStr::npos)
 		{
 			tKey vKey = rArg.substr(0, vPos);
 			tArg vVal = rArg.substr(vPos + 1);
 			return fParseOptE("-", vKey, vVal);
-		}
-		for(auto &rIter: rArg)
-		{
-			tKey vKey = tStr(1, rIter);
-			if(this->vFlagTab.count(vKey))
+		} // -o=v
+		for(auto &rI: rArg)
+		{ // iterate over all short options
+			tKey vKey = tStr(1, rI);
+			if(this->fVetOptKey(vKey))
 			{
-				this->vFlagTab[vKey]->vCount++;
-				continue;
-			}
-			if(this->vOptTab.count(vKey))
-			{
-				if(rStream.fVetNext())
+				if(rArgStream.fVet())
 				{
-					this->vOptTab[vKey]->vPak.push_back(rStream.fPopNext());
+					*this->vOptTab[vKey] = rArgStream.fPop();
 					continue;
 				}
 				else
@@ -296,192 +266,183 @@ private: // actions
 					if(rArg.size() > 1)
 					{
 						std::cerr
-							<< "Error: missing argument for '" << rIter
-							<< "' in -" << rArg << std::endl;
+							<< "missing argument for '" << rI << "' in -"
+							<< rArg << ";" << __LINE__ << std::endl;
 					}
 					else
 					{
 						std::cerr
-							<< "Error: missing argument for -" << rIter
+							<< "missing argument for -" << rI << ";" << __LINE__
 							<< std::endl;
 					}
 					this->fExitHelp(1);
 					return 0;
 				}
-			}
-			if(rIter == 'h' && this->vHelpText != "")
+			} // found option
+			else if(rI == 'h' && this->vHelpText != "")
 			{
 				this->fExitHelp(0);
 				return 1;
-			}
-			if(rArg.size() > 1)
+			} // no option found - try default help option
+			else if(rArg.size() > 1)
 			{
 				std::cerr
-					<< "Error: '" << rIter << "' in -" << rArg
-					<< " is not a recognised flag or option" << std::endl;
+					<< rI << rArg << " is not an option;" << __LINE__
+					<< std::endl;
 			}
 			else
 			{
-				std::cerr
-					<< "Error: -" << rIter
-					<< " is not a recognised flag or option" << std::endl;
+				std::cerr << rI << " - is not an option;" << __LINE__ << std::endl;
 			}
 			this->fExitHelp(1);
 			return 0;
-		}
+		} // iterate over all options
 		return 1;
 	} // fParseOptS
-	bool fParse(tStream &rStream)
+	bool fParse(tArgStream &rArgStream)
 	{
 		bool vArgIs1st = 1;
-		while(rStream.fVetNext())
+		while(rArgStream.fVet())
 		{
-			tArg vArg = rStream.fPopNext();
+			tArg vArg = rArgStream.fPop();
 			if(vArg == "--")
 			{
-				while(rStream.fVetNext())
+				while(rArgStream.fVet())
 				{
-					this->vArgPak.push_back(rStream.fPopNext());
+					vArg = rArgStream.fPop();
+					if(vArg == "--")
+					{
+						return fParse(rArgStream);
+					}
+					this->vArgArr.push_back(vArg);
 				}
 				continue;
-			} // ArgPak
-			if(vArg.compare(0, 2, "--") == 0)
+			} // not options, not commands - write to the argument array
+			else if(vArg.compare(0, 2, "--") == 0)
 			{
-				this->fParseOptL(vArg.substr(2), rStream);
+				this->fParseOptL(vArg.substr(2), rArgStream);
 				continue;
-			} // OptL
-			if(vArg[0] == '-')
+			} // option in a long format
+			else if(vArg.compare(0, 1, "-") == 0)
 			{
 				if(vArg.size() == 1 || std::isdigit(vArg[1]))
 				{
-					this->vArgPak.push_back(vArg);
+					this->vArgArr.push_back(vArg);
 				}
 				else
 				{
-					this->fParseOptS(vArg.substr(1), rStream);
+					this->fParseOptS(vArg.substr(1), rArgStream);
 				}
 				continue;
-			} // OptS
-			// registered command
-			if(vArgIs1st && this->vCmdTab.count(vArg))
+			} // option in a short format
+			else if(vArgIs1st && this->vCmdTab.count(vArg))
 			{
-				tParserPtr pParser = this->vCmdTab[vArg];
-				pParser->fParse(rStream);
-				if(pParser->pCallback)
+				tCmdPtr pCmd = this->vCmdTab[vArg];
+				pCmd->fParse(rArgStream);
+				if(pCmd->pCallback)
 				{
-					pParser->pCallback(vArg, *pParser);
+					pCmd->pCallback(vArg, *pCmd);
 				}
-				continue;
-			} // Cmd
-			if(vArgIs1st && vArg == "help" && this->vCmdTab.size())
+			} // command
+			else if(vArgIs1st && vArg == "help" && this->fVetCmdTab())
 			{
-				if(rStream.fVetNext())
+				if(rArgStream.fVet())
 				{
-					tKey vKey = rStream.fPopNext();
-					if(this->vCmdTab.find(vKey) == this->vCmdTab.end())
+					tKey vKey = rArgStream.fPop();
+					if(this->fVetCmdKey(vKey))
 					{
 						std::cerr
-							<< "Error: '" << vKey
-							<< "' is not a recognised command" << std::endl;
+							<< vKey << " - does not have help;" << __LINE__
+							<< std::endl;
 						this->fExitHelp(1);
 						return 0;
-					}
+					} // not a command
 					else
 					{
 						this->vCmdTab[vKey]->fExitHelp(0);
-					}
-				}
+						return 1;
+					} // help for the command
+					return 0;
+				} // help for a command
 				else
 				{
-					std::cerr
-						<< "Error: the help command requires an argument"
-						<< std::endl;
-					this->fExitHelp(1);
-					return 0;
-				}
-			} // help
-			this->vArgPak.push_back(vArg);
+					this->fExitHelp(0);
+					return 1;
+				} // just write our help
+				return 0;
+			} // not an option, not a command - try default help
+			this->vArgArr.push_back(vArg);
 			vArgIs1st = 0;
-		} // while(rStream.fVetNext())
+		} // parse all arguments from the stream one by one
 		return 1;
 	}	// fParse
 public: // actions
-	bool fParse(int vArgC, const char **vArgV)
+	template<typename tArgV = const char **>
+	bool fParse(int vArgC, tArgV vArgV)
 	{
-		if(vArgC > 1)
+		if(vArgC <= 1)
 		{
-			tStream vStream;
-			for(int vIter = 1; vIter < vArgC; vIter++)
-			{
-				vStream.fAppend(vArgV[vIter]);
-			}
-			this->fParse(vStream);
+			return 1;
 		}
+		tArgStream vArgStream;
+		for(int vIter = 1; vIter < vArgC; vIter++)
+		{
+			vArgStream.fAdd(vArgV[vIter]);
+		}
+		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	bool fParse(int vArgC, char **vArgV)
+	bool fParse(const tArr &rArr)
 	{
-		if(vArgC > 1)
+		tArgStream vArgStream;
+		for(const tArg &rArg: rArr)
 		{
-			tStream vStream;
-			for(int vI = 1; vI < vArgC; vI++)
-			{
-				vStream.fAppend(vArgV[vI]);
-			}
-			this->fParse(vStream);
+			vArgStream.fAdd(rArg);
 		}
+		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	bool fParse(const tPak &rArgPak)
+	bool fPrint(tStr vIndentStr = "") const
 	{
-		tStream vStream;
-		for(const tArg &rArg: rArgPak)
+		std::cout << vIndentStr << "[CmdTab]=(" << std::endl;
+		for(auto &rI: this->vCmdTab)
 		{
-			vStream.fAppend(rArg);
+			const tKey &rK = rI.first;
+			const tCmd &rC = *rI.second;
+			std::cout << vIndentStr << " [" << rK << "]=(" << std::endl;
+			rC.fPrint(vIndentStr + "  ");
+			std::cout << vIndentStr << " )=[" << rK << "]" << std::endl;
 		}
-		this->fParse(vStream);
-		return 1;
-	} // fParse
-	auto &fPrint() const
-	{
-		std::cout << "[OptTab]=(" << std::endl;
+		std::cout << vIndentStr << ")=[CmdTab]" << std::endl;
+		std::cout << vIndentStr << "[OptTab]=(" << std::endl;
 		for(auto &rI: this->vOptTab)
 		{
-			const tKey	  &rK = rI.first;
-			const tOption &rO = *rI.second;
-			std::cout << " [" << rK << "]=(" << std::endl;
-			std::cout << "  [Def]=(" << rO.vDef << ")=[Def]" << std::endl;
-			std::cout << "  [Pak]=(" << rO.vPak << ")=[Pak]" << std::endl;
-			std::cout << " )=[" << rK << "]" << std::endl;
+			const tKey &rK = rI.first;
+			const tOpt &rO = *rI.second;
+			std::cout << vIndentStr << " [" << rK << "]=(" << std::endl;
+			std::cout << vIndentStr << "  " << rO << std::endl;
+			std::cout << vIndentStr << " )=[" << rK << "]" << std::endl;
 		}
-		std::cout << ")=[OptTab]" << std::endl;
-		std::cout << "[FlagTab]=(" << std::endl;
-		for(auto &rI: this->vFlagTab)
+		std::cout << vIndentStr << ")=[OptTab]" << std::endl;
+		std::cout << vIndentStr << "[ArgArr]=(" << std::endl;
+		for(auto vI = 0; vI < this->vArgArr.size(); vI++)
 		{
-			const tKey	&rK = rI.first;
-			const tFlag &rF = *rI.second;
-			std::cout << " [" << rK << "]=(" << std::endl;
-			std::cout << "  [Count]=(" << rF.vCount << ")=[Count]" << std::endl;
-			std::cout << " )=[" << rK << "]" << std::endl;
+			const auto &rA = this->vArgArr[vI];
+			std::cout
+				<< vIndentStr << " [" << vI << "]=(" << rA << ")" << std::endl;
 		}
-		std::cout << ")=[FlagTab]" << std::endl;
-		std::cout << "[ArgPak]=(" << std::endl;
-		for(auto vI = 0; vI < this->vArgPak.size(); vI++)
-		{
-			const auto &rA = this->vArgPak[vI];
-			std::cout << " [" << vI << "]=(" << rA << ")" << std::endl;
-		}
-		std::cout << ")=[ArgPak]" << std::endl;
-		return *this;
+		std::cout << vIndentStr << ")=[ArgArr]" << std::endl;
+		return 1;
 	}	 // fPrint
 private: // datadef
-	tPak					   vArgPak;
-	tStr					   vHelpText;
-	tCallback				  *pCallback;
-	std::map<tKey, tOptionPtr> vOptTab;
-	std::map<tKey, tFlagPtr>   vFlagTab;
-	std::map<tKey, tParserPtr> vCmdTab;
-} tParser;
+	tStr					vHelpText;
+	tCallback			   *pCallback;
+	std::map<tKey, tCmdPtr> vCmdTab;
+	std::map<tKey, tOptPtr> vOptTab;
+	tArr					vArgArr;
+} tCmd; // command type
+using tOptPtr = tCmd::tOptPtr;
+using tCmdPtr = tCmd::tCmdPtr;
 
 } // namespace nTermArgs
 

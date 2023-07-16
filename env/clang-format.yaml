@@ -65,7 +65,7 @@ BreakConstructorInitializers: BeforeComma # ctor()\n:a(1)\n,b(2)\n{}
 BreakInheritanceList: BeforeComma # class\n:a\n,b\n{};
 BreakStringLiterals: false # const char*str =\n"literal";
 CompactNamespaces: false   # each namespace on a new line
-Cpp11BracedListStyle: false # do not write it like functions
+Cpp11BracedListStyle: true # write it like functions
 PointerAlignment:       Right # tInt *pInt;
 DerivePointerAlignment: false # do the most thing the file has with &*
 ReferenceAlignment:     Right
