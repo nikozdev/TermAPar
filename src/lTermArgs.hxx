@@ -1,441 +1,553 @@
 #ifndef dTermArgsHxx
 #define dTermArgsHxx
 
-#include <map>
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <cctype>
-#include <iostream>
-#include <sstream>
+
+#include <map>
+#include <vector>
 #include <deque>
 #include <set>
+
+#include <string>
+#include <iostream>
+#include <sstream>
 
 namespace nTermArgs
 {
 
-using tStr = std::string;
+// operats
+
+template<typename t>
+std::ostream &operator<<(std::ostream &vStream, const std::vector<t> &vVector)
+{
+	vStream << "[";
+	for(size_t vIter = 0; vIter < vVector.size(); ++vIter)
+	{
+		if(vIter)
+		{
+			vStream << ", ";
+		}
+		vStream << vVector[vIter];
+	}
+	vStream << "]";
+	return vStream;
+} // operator<<(...tVector)
+
+// typedef
+
+using tStr		 = std::string;
+using tStrStream = std::stringstream;
+
 using tArg = tStr;
+using tKey = tStr;
 using tPak = std::vector<tArg>;
 
 typedef struct tStream
 {
-  public: // datadef
-	std::deque<tArg> args;
-  public: // actions
-	void append(const tArg &vArg) { args.push_back(vArg); }
-	tArg next()
+  public: // setters
+	void fAppend(const tArg &vArg)
 	{
-		tArg arg = args.front();
-		args.pop_front();
-		return arg;
-	}
-	bool hasNext() { return args.size() > 0; }
+		this->vPak.push_back(vArg);
+	}	  // fAppend
+  public: // getters
+	tArg fPopNext()
+	{
+		tArg vArg = this->vPak.front();
+		this->vPak.pop_front();
+		return vArg;
+	}	  // fPopNext
+  public: // vetters
+	bool fVetNext()
+	{
+		return this->vPak.size();
+	}	  // fVetNext
+  public: // datadef
+	std::deque<tArg> vPak;
 } tStream;
 typedef struct tOption
 {
-	tPak values;
-	tArg fallback;
+  public: // datadef
+	tPak vPak;
+	tArg vDef;
 } tOption;
 typedef struct tFlag
 {
-	int count = 0;
+	int vCount = 0;
 } tFlag;
-
-template<typename T>
-std::ostream &operator<<(std::ostream &stream, const std::vector<T> &vec)
-{
-	stream << "[";
-	for(size_t i = 0; i < vec.size(); ++i)
-	{
-		if(i) { std::cout << ", "; }
-		stream << vec[i];
-	}
-	stream << "]";
-	return stream;
-}
-
-typedef class ArgParser
+typedef class tParser
 {
   public: // typedef
+	typedef void(tCallback)(const tKey &vCmdKey, tParser &rParser);
   public: // codetor
-	ArgParser(const tStr &helptext = "", const tStr &version = "")
-		: helptext(helptext), version(version)
+	tParser(const tStr &vHelpText = "", const tStr &vVnumText = "")
+		: vHelpText(vHelpText), vVnumText(vVnumText)
 	{
-	}
-	~ArgParser()
+	} // tParser
+	~tParser()
 	{
-		std::set<tOption *> unique_options;
-		for(auto element: options) { unique_options.insert(element.second); }
-		for(auto pointer: unique_options) { delete pointer; }
-
-		std::set<tFlag *> unique_flags;
-		for(auto element: flags) { unique_flags.insert(element.second); }
-		for(auto pointer: unique_flags) { delete pointer; }
-
-		std::set<ArgParser *> unique_cmd_parsers;
-		for(auto element: commands)
+		std::set<tParser *> vCmdSet;
+		for(auto &r: vCmdTab)
 		{
-			unique_cmd_parsers.insert(element.second);
+			vCmdSet.insert(r.second);
 		}
-		for(auto pointer: unique_cmd_parsers) { delete pointer; }
-	}
+		for(auto *p: vCmdSet)
+		{
+			delete p;
+		}
+		std::set<tOption *> vOptSet;
+		for(auto &r: vOptTab)
+		{
+			vOptSet.insert(r.second);
+		}
+		for(auto *p: vOptSet)
+		{
+			delete p;
+		}
+		std::set<tFlag *> vFlagSet;
+		for(auto &r: vFlagTab)
+		{
+			vFlagSet.insert(r.second);
+		}
+		for(auto *p: vFlagSet)
+		{
+			delete p;
+		}
+	}	  // ~tParser
   public: // getters
-  public: // vetters
-	bool found(const std::string &name)
+	auto fGetCmdKey() const
 	{
-		if(flags.count(name) > 0) { return flags[name]->count > 0; }
-		if(options.count(name) > 0) { return options[name]->values.size() > 0; }
-		return false;
-	}
-	bool commandFound() { return command_name != ""; }
-  public: // setters
-	// Register flags and options.
-	void flag(const std::string &name)
+		return *(&this->vCmdKey);
+	} // fGetCmdKey
+	auto fGetCmdParser()
 	{
-		tFlag			 *flag = new tFlag();
-		std::stringstream stream(name);
-		std::string		  alias;
-		while(stream >> alias) { flags[alias] = flag; }
-	}
-	void option(const std::string &name, const std::string &fallback = "")
+		return *this->vCmdTab[this->vCmdKey];
+	} // fGetCmdParser
+	auto fGetCmdParser(const tKey &rKey)
 	{
-		tOption *option	 = new tOption();
-		option->fallback = fallback;
-		std::stringstream stream(name);
-		std::string		  alias;
-		while(stream >> alias) { options[alias] = option; }
-	}
-	/* void parse(int argc, const char**argv)
-	 * Parse an array of std::string arguments. We assume that [argc] and [argv]
-	 * are the original parameters passed to main() and skip the first element.
-	 * In some situations [argv] can be empty, i.e. [argc == 0]. This can lead
-	 * to security vulnerabilities if not handled explicitly.
-	 */
-	void parse(int argc, const char **argv)
+		return *this->vCmdTab[rKey];
+	} // fGetCmdParser
+	auto fGetArgCount(const tKey &rKey)
 	{
-		if(argc > 1)
+		if(this->vFlagTab.count(rKey))
 		{
-			tStream stream;
-			for(int i = 1; i < argc; i++) { stream.append(argv[i]); }
-			parse(stream);
+			return static_cast<unsigned>(this->vFlagTab[rKey]->vCount);
 		}
-	} // parse
-	void parse(int argc, char **argv)
-	{
-		if(argc > 1)
+		if(this->vOptTab.count(rKey))
 		{
-			tStream stream;
-			for(int i = 1; i < argc; i++) { stream.append(argv[i]); }
-			parse(stream);
+			return static_cast<unsigned>(this->vOptTab[rKey]->vPak.size());
 		}
-	} // parse
-	void parse(std::vector<std::string> args)
+		return 0u;
+	} // fGetArgCount
+	auto fGetArgArray(const tKey &rKey)
 	{
-		tStream stream;
-		for(std::string &arg: args) { stream.append(arg); }
-		parse(stream);
-	} // parse
-	int count(const std::string &name)
-	{
-		if(flags.count(name) > 0) { return flags[name]->count; }
-		if(options.count(name) > 0) { return options[name]->values.size(); }
-		return 0;
-	}
-	std::string value(const std::string &name)
-	{
-		if(options.count(name) > 0)
+		if(this->vOptTab.count(rKey))
 		{
-			if(options[name]->values.size() > 0)
+			return this->vOptTab[rKey]->vPak;
+		}
+		return tPak{};
+	} // fGetArgArray
+	auto fGetOpt(const tKey &rKey)
+	{
+		if(this->vOptTab.count(rKey))
+		{
+			if(this->vOptTab[rKey]->vPak.size())
 			{
-				return options[name]->values.back();
+				return this->vOptTab[rKey]->vPak.back();
 			}
-			return options[name]->fallback;
+			return this->vOptTab[rKey]->vDef;
 		}
-		return std::string();
-	}
-	std::vector<std::string> values(const std::string &name)
+		return tArg{};
+	}	  // fGetOpt
+  public: // vetters
+	bool fVetCmd() const
 	{
-		if(options.count(name) > 0) { return options[name]->values; }
-		return std::vector<std::string>();
-	}
-	// Register a command. Returns the command's ArgParser instance.
-	ArgParser &command(
-		const std::string &name,
-		const std::string &helptext									  = "",
-		void (*callback)(std::string cmd_name, ArgParser &cmd_parser) = nullptr
+		return vCmdKey != "";
+	} // fVetCmd
+	bool fVetCmd(const tKey &rKey) const
+	{
+		return vCmdKey == rKey;
+	} // fVetCmd
+	bool fVetArg(const tKey &rKey)
+	{
+		if(this->vFlagTab.count(rKey))
+		{
+			return this->vFlagTab[rKey]->vCount;
+		}
+		if(this->vOptTab.count(rKey))
+		{
+			return this->vOptTab[rKey]->vPak.size();
+		}
+		return 0;
+	}	  // fVetArg
+  public: // setters
+	auto &fRegCmd(
+		const tKey &rKey, const tStr &rHelpText = "", tCallback *pCallback = nullptr
 	)
 	{
-		ArgParser *parser = new ArgParser();
-		parser->helptext  = helptext;
-		parser->callback  = callback;
-
-		std::stringstream stream(name);
-		std::string		  alias;
-
-		while(stream >> alias) { commands[alias] = parser; }
-
-		return *parser;
+		tParser *pParser   = new tParser();
+		pParser->vHelpText = rHelpText;
+		pParser->pCallback = pCallback;
+		tStrStream vStream(rKey);
+		tStr	   vAlias;
+		while(vStream >> vAlias)
+		{
+			this->vCmdTab[vAlias] = pParser;
+		}
+		return *pParser;
 	}
-	std::string commandName() { return command_name; }
-	ArgParser  &commandParser() { return *commands[command_name]; }
-	void		print()
+	auto &fRegOpt(const tKey &rKey, const tStr &rDef = "")
 	{
-		std::cout << "Options:\n";
-		if(options.size() > 0)
+		tOption *pOption = new tOption();
+		pOption->vDef	 = rDef;
+		tStrStream vStream(rKey);
+		tStr	   vAlias;
+		while(vStream >> vAlias)
 		{
-			for(auto element: options)
-			{
-				std::cout << "  " << element.first << ": ";
-				tOption *option = element.second;
-				std::cout << "(" << option->fallback << ") ";
-				std::cout << option->values;
-				std::cout << "\n";
-			}
+			this->vOptTab[vAlias] = pOption;
 		}
-		else { std::cout << "  [none]\n"; }
-
-		std::cout << "\nFlags:\n";
-		if(flags.size() > 0)
+		return *pOption;
+	} // fRegOpt
+	auto &fRegFlag(const tKey &rKey)
+	{
+		tFlag	  *pFlag = new tFlag();
+		tStrStream vStream(rKey);
+		tStr	   vAlias;
+		while(vStream >> vAlias)
 		{
-			for(auto element: flags)
-			{
-				std::cout
-					<< "  " << element.first << ": " << element.second->count
-					<< "\n";
-			}
+			this->vFlagTab[vAlias] = pFlag;
 		}
-		else { std::cout << "  [none]\n"; }
-
-		std::cout << "\nArguments:\n";
-		if(args.size() > 0)
-		{
-			for(auto arg: args) { std::cout << "  " << arg << "\n"; }
-		}
-		else { std::cout << "  [none]\n"; }
-
-		std::cout << "\nCommand:\n";
-		if(commandFound()) { std::cout << "  " << command_name << "\n"; }
-		else { std::cout << "  [none]\n"; }
-	}
-  private: // datadef
-	std::map<std::string, tOption *>   options;
-	std::map<std::string, tFlag *>	   flags;
-	std::map<std::string, ArgParser *> commands;
-	std::string						   command_name;
+		return *pFlag;
+	}	   // fRegFlag
   private: // actions
-	void parse(tStream &stream)
+	auto fExitHelp(int vCode = 0)
 	{
-		bool is_first_arg = true;
-
-		while(stream.hasNext())
-		{
-			tArg arg = stream.next();
-
-			// If we enounter a '--', turn off option parsing.
-			if(arg == "--")
-			{
-				while(stream.hasNext()) { args.push_back(stream.next()); }
-				continue;
-			}
-
-			// Is the argument a long-form option or flag?
-			if(arg.compare(0, 2, "--") == 0)
-			{
-				parseLongOption(arg.substr(2), stream);
-				continue;
-			}
-
-			// Is the argument a short-form option or flag? If the argument
-			// consists of a single dash or a dash followed by a digit, we treat
-			// it as a positional argument.
-			if(arg[0] == '-')
-			{
-				if(arg.size() == 1 || isdigit(arg[1])) { args.push_back(arg); }
-				else { parseShortOption(arg.substr(1), stream); }
-				continue;
-			}
-
-			// Is the argument a registered command?
-			if(is_first_arg && commands.count(arg) > 0)
-			{
-				ArgParser *command_parser = commands[arg];
-				command_name			  = arg;
-				command_parser->parse(stream);
-				if(command_parser->callback != nullptr)
-				{
-					command_parser->callback(arg, *command_parser);
-				}
-				continue;
-			}
-
-			// Is the argument the automatic 'help' command?
-			if(is_first_arg && arg == "help" && commands.size() > 0)
-			{
-				if(stream.hasNext())
-				{
-					std::string name = stream.next();
-					if(commands.find(name) == commands.end())
-					{
-						std::cerr
-							<< "Error: '" << name
-							<< "' is not a recognised command.\n";
-						exit(1);
-					}
-					else { commands[name]->exitHelp(); }
-				}
-				else
-				{
-					std::cerr
-						<< "Error: the help command requires an argument.\n";
-					exit(1);
-				}
-			}
-
-			// Otherwise add the argument to our list of positional arguments.
-			args.push_back(arg);
-			is_first_arg = false;
-		}
-	}
-	void registerOption(const std::string &name, tOption *option);
-	void parseLongOption(tArg arg, tStream &stream)
+		std::cout << this->vHelpText << std::endl;
+		return exit(vCode);
+	} // fExitHelp
+	auto fExitVnum(int vCode = 0)
 	{
-		size_t pos = arg.find("=");
-		if(pos != std::string::npos)
-		{
-			parseEqualsOption("--", arg.substr(0, pos), arg.substr(pos + 1));
-			return;
-		}
-
-		if(flags.count(arg) > 0)
-		{
-			flags[arg]->count++;
-			return;
-		}
-
-		if(options.count(arg) > 0)
-		{
-			if(stream.hasNext())
-			{
-				options[arg]->values.push_back(stream.next());
-				return;
-			}
-			else
-			{
-				std::cerr << "Error: missing argument for --" << arg << ".\n";
-				exit(1);
-			}
-		}
-		if(arg == "help" && this->helptext != "") { exitHelp(); }
-		if(arg == "version" && this->version != "") { exitVersion(); }
-		std::cerr
-			<< "Error: --" << arg << " is not a recognised flag or option.\n";
-		exit(1);
-	}
-	void parseShortOption(tArg arg, tStream &stream)
+		std::cout << this->vVnumText << std::endl;
+		return exit(vCode);
+	} // fExitVnum
+	bool fParseOptE(const tArg &rPfx, const tKey &rKey, const tArg &rArg)
 	{
-		size_t pos = arg.find("=");
-		if(pos != tStr::npos)
+		if(this->vOptTab.count(rKey))
 		{
-			parseEqualsOption("-", arg.substr(0, pos), arg.substr(pos + 1));
-			return;
-		}
-
-		for(char &c: arg)
-		{
-			tStr name = std::string(1, c);
-
-			if(flags.count(name) > 0)
+			if(rArg.size())
 			{
-				flags[name]->count++;
-				continue;
-			}
-
-			if(options.count(name) > 0)
-			{
-				if(stream.hasNext())
-				{
-					options[name]->values.push_back(stream.next());
-					continue;
-				}
-				else
-				{
-					if(arg.size() > 1)
-					{
-						std::cerr
-							<< "Error: missing argument for '" << c << "' in -"
-							<< arg << ".\n";
-					}
-					else
-					{
-						std::cerr
-							<< "Error: missing argument for -" << c << ".\n";
-					}
-					exit(1);
-				}
-			}
-
-			if(c == 'h' && this->helptext != "") { exitHelp(); }
-
-			if(c == 'v' && this->version != "") { exitVersion(); }
-
-			if(arg.size() > 1)
-			{
-				std::cerr
-					<< "Error: '" << c << "' in -" << arg
-					<< " is not a recognised flag or option.\n";
+				this->vOptTab[rKey]->vPak.push_back(rArg);
 			}
 			else
 			{
 				std::cerr
-					<< "Error: -" << c
-					<< " is not a recognised flag or option.\n";
-			}
-			exit(1);
-		}
-	}
-	void
-	parseEqualsOption(std::string prefix, std::string name, std::string value)
-	{
-		if(options.count(name) > 0)
-		{
-			if(value.size() > 0) { options[name]->values.push_back(value); }
-			else
-			{
-				std::cerr
-					<< "Error: missing value for " << prefix << name << ".\n";
-				exit(1);
+					<< "Error: missing value for " << rPfx << rKey << std::endl;
+				this->fExitHelp(1);
+				return 0;
 			}
 		}
 		else
 		{
 			std::cerr
-				<< "Error: " << prefix << name
-				<< " is not a recognised option.\n";
-			exit(1);
+				<< "Error: " << rPfx << rKey << " is not a recognised option"
+				<< std::endl;
+			this->fExitHelp(1);
+			return 0;
 		}
-	}
-	void exitHelp()
+		return 1;
+	} // fParseOptE
+	bool fParseOptL(const tArg &rArg, tStream &rStream)
 	{
-		std::cout << helptext << std::endl;
-		exit(0);
-	}
-	void exitVersion()
+		size_t vPos = rArg.find("=");
+		if(vPos != std::string::npos)
+		{
+			tKey vKey = rArg.substr(0, vPos);
+			tArg vVal = rArg.substr(vPos + 1);
+			this->fParseOptE("--", vKey, vVal);
+			return 1;
+		}
+		if(this->vFlagTab.count(rArg))
+		{
+			this->vFlagTab[rArg]->vCount++;
+			return 1;
+		}
+		if(vOptTab.count(rArg))
+		{
+			if(rStream.fVetNext())
+			{
+				this->vOptTab[rArg]->vPak.push_back(rStream.fPopNext());
+				return 1;
+			}
+			else
+			{
+				std::cerr << "Error: missing argument for --" << rArg << std::endl;
+				this->fExitHelp(1);
+				return 0;
+			}
+		}
+		if(rArg == "help" && this->vHelpText != "")
+		{
+			this->fExitHelp(0);
+			return 1;
+		}
+		if(rArg == "vnum" && this->vVnumText != "")
+		{
+			this->fExitVnum(0);
+			return 1;
+		}
+		std::cerr
+			<< "Error: --" << rArg << " is not a recognised flag or option"
+			<< std::endl;
+		this->fExitHelp(1);
+		return 0;
+	} // fParseOptL
+	bool fParseOptS(const tArg &rArg, tStream &rStream)
 	{
-		std::cout << version << std::endl;
-		exit(0);
-	}
+		size_t vPos = rArg.find("=");
+		if(vPos != tStr::npos)
+		{
+			tKey vKey = rArg.substr(0, vPos);
+			tArg vVal = rArg.substr(vPos + 1);
+			return fParseOptE("-", vKey, vVal);
+		}
+		for(auto &rIter: rArg)
+		{
+			tKey vKey = tStr(1, rIter);
+			if(this->vFlagTab.count(vKey))
+			{
+				this->vFlagTab[vKey]->vCount++;
+				continue;
+			}
+			if(this->vOptTab.count(vKey))
+			{
+				if(rStream.fVetNext())
+				{
+					this->vOptTab[vKey]->vPak.push_back(rStream.fPopNext());
+					continue;
+				}
+				else
+				{
+					if(rArg.size() > 1)
+					{
+						std::cerr
+							<< "Error: missing argument for '" << rIter
+							<< "' in -" << rArg << std::endl;
+					}
+					else
+					{
+						std::cerr
+							<< "Error: missing argument for -" << rIter
+							<< std::endl;
+					}
+					this->fExitHelp(1);
+					return 0;
+				}
+			}
+			if(rIter == 'h' && this->vHelpText != "")
+			{
+				this->fExitHelp(0);
+				return 1;
+			}
+			if(rIter == 'v' && this->vVnumText != "")
+			{
+				this->fExitVnum(0);
+				return 1;
+			}
+			if(rArg.size() > 1)
+			{
+				std::cerr
+					<< "Error: '" << rIter << "' in -" << rArg
+					<< " is not a recognised flag or option" << std::endl;
+			}
+			else
+			{
+				std::cerr
+					<< "Error: -" << rIter
+					<< " is not a recognised flag or option" << std::endl;
+			}
+			this->fExitHelp(1);
+			return 0;
+		}
+		return 1;
+	} // fParseOptS
+	bool fParse(tStream &rStream)
+	{
+		bool vArgIs1st = 1;
+		while(rStream.fVetNext())
+		{
+			tArg vArg = rStream.fPopNext();
+			if(vArg == "--")
+			{
+				while(rStream.fVetNext())
+				{
+					this->vArgPak.push_back(rStream.fPopNext());
+				}
+				continue;
+			} // ArgPak
+			if(vArg.compare(0, 2, "--") == 0)
+			{
+				this->fParseOptL(vArg.substr(2), rStream);
+				continue;
+			} // OptL
+			if(vArg[0] == '-')
+			{
+				if(vArg.size() == 1 || std::isdigit(vArg[1]))
+				{
+					this->vArgPak.push_back(vArg);
+				}
+				else
+				{
+					this->fParseOptS(vArg.substr(1), rStream);
+				}
+				continue;
+			} // OptS
+			// registered command
+			if(vArgIs1st && this->vCmdTab.count(vArg))
+			{
+				tParser *pParser = this->vCmdTab[vArg];
+				this->vCmdKey	 = vArg;
+				pParser->fParse(rStream);
+				if(pParser->pCallback)
+				{
+					pParser->pCallback(vArg, *pParser);
+				}
+				continue;
+			} // Cmd
+			if(vArgIs1st && vArg == "help" && this->vCmdTab.size())
+			{
+				if(rStream.fVetNext())
+				{
+					tKey vKey = rStream.fPopNext();
+					if(this->vCmdTab.find(vKey) == this->vCmdTab.end())
+					{
+						std::cerr
+							<< "Error: '" << vKey
+							<< "' is not a recognised command" << std::endl;
+						this->fExitHelp(1);
+						return 0;
+					}
+					else
+					{
+						this->vCmdTab[vKey]->fExitHelp(0);
+					}
+				}
+				else
+				{
+					std::cerr
+						<< "Error: the help command requires an argument"
+						<< std::endl;
+					this->fExitHelp(1);
+					return 0;
+				}
+			} // help
+			this->vArgPak.push_back(vArg);
+			vArgIs1st = 0;
+		} // while(rStream.fVetNext())
+		return 1;
+	}	  // fParse
+  public: // actions
+	bool fParse(int vArgC, const char **vArgV)
+	{
+		if(vArgC > 1)
+		{
+			tStream vStream;
+			for(int vIter = 1; vIter < vArgC; vIter++)
+			{
+				vStream.fAppend(vArgV[vIter]);
+			}
+			this->fParse(vStream);
+		}
+		return 1;
+	} // fParse
+	bool fParse(int vArgC, char **vArgV)
+	{
+		if(vArgC > 1)
+		{
+			tStream vStream;
+			for(int vIter = 1; vIter < vArgC; vIter++)
+			{
+				vStream.fAppend(vArgV[vIter]);
+			}
+			this->fParse(vStream);
+		}
+		return 1;
+	} // fParse
+	bool fParse(const tPak &rArgPak)
+	{
+		tStream vStream;
+		for(const tArg &rArg: rArgPak)
+		{
+			vStream.fAppend(rArg);
+		}
+		this->fParse(vStream);
+		return 1;
+	} // fParse
+	bool fPrint() const
+	{
+		std::cout << "Options:\n";
+		if(this->vOptTab.size())
+		{
+			for(auto &rIter: this->vOptTab)
+			{
+				tOption *pOpt = rIter.second;
+				std::cout << "  " << rIter.first << ": ";
+				std::cout << "(" << pOpt->vDef << ") ";
+				std::cout << pOpt->vPak;
+				std::cout << std::endl;
+			}
+		}
+		else
+		{
+			std::cout << "  [none]" << std::endl;
+		}
+		std::cout << "\nFlags:\n";
+		if(this->vFlagTab.size())
+		{
+			for(auto &rIter: this->vFlagTab)
+			{
+				std::cout
+					<< "  " << rIter.first << ": " << rIter.second->vCount
+					<< std::endl;
+			}
+		}
+		else
+		{
+			std::cout << "  [none]\n";
+		}
+		std::cout << "\nArguments:\n";
+		if(this->vArgPak.size())
+		{
+			for(auto &rArg: this->vArgPak)
+			{
+				std::cout << "  " << rArg << std::endl;
+			}
+		}
+		else
+		{
+			std::cout << "  [none]" << std::endl;
+		}
+		std::cout << "\nCommand:\n";
+		if(this->fVetCmd())
+		{
+			std::cout << "  " << this->vCmdKey << std::endl;
+		}
+		else
+		{
+			std::cout << "  [none]" << std::endl;
+		}
+		return 1;
+	}	  // fPrint
   public: // datadef
-	// Stores positional arguments.
-	std::vector<std::string> args;
-
-	// Application/command help text and version strings.
-	std::string helptext;
-	std::string version;
-
-	// Callback function for command parsers.
-	void (*callback)(std::string cmd_name, ArgParser &cmd_parser);
-} ArgParser;
+	tPak	   vArgPak;
+	tStr	   vHelpText;
+	tStr	   vVnumText;
+	tCallback *pCallback;
+  private: // datadef
+	tKey					  vCmdKey;
+	std::map<tKey, tParser *> vCmdTab;
+	std::map<tKey, tOption *> vOptTab;
+	std::map<tKey, tFlag *>	  vFlagTab;
+} tParser;
 
 } // namespace nTermArgs
 

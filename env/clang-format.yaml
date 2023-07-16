@@ -22,13 +22,13 @@ AlignTrailingComments:
   OverEmptyLines: 0
 AllowAllArgumentsOnNextLine:               true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowShortBlocksOnASingleLine: Always # while( expr ) { ... }
+AllowShortBlocksOnASingleLine: Never # while( expr ) { ... }
 AllowShortEnumsOnASingleLine:  true   # enum eName { a, b };
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse # if ( expr ) { ... }
 AllowShortCaseLabelsOnASingleLine:   true # case a: return b;
 AllowShortLoopsOnASingleLine:        true # for ( auto a : b ) { ... }
-AllowShortFunctionsOnASingleLine: All # int f( int a ) { return a; }
-AllowShortLambdasOnASingleLine:   All # [=](...)->void{...}
+AllowShortFunctionsOnASingleLine: None # int f( int a ) { return a; }
+AllowShortLambdasOnASingleLine:   None # [=](...)->void{...}
 AlwaysBreakTemplateDeclarations:      Yes # Yes, No, Multiline (LongOnes)
 AlwaysBreakAfterDefinitionReturnType: None # int\nfunc(){return 0;}
 AlwaysBreakAfterReturnType:           None # external int\n();
