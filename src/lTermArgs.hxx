@@ -344,31 +344,39 @@ private: // actions
 					pCmd->pCallback(vArg, *pCmd);
 				}
 			} // command
-			else if(vArgIs1st && vArg == "help" && this->fVetCmdTab())
+			else if(vArgIs1st && vArg == "help")
 			{
-				if(rArgStream.fVet())
+				if(this->fVetCmdTab())
 				{
-					tKey vKey = rArgStream.fPop();
-					if(this->fVetCmdKey(vKey))
+					if(rArgStream.fVet())
 					{
-						std::cerr
-							<< vKey << " - does not have help;" << __LINE__
-							<< std::endl;
-						this->fExitHelp(1);
+						tKey vKey = rArgStream.fPop();
+						if(this->fVetCmdKey(vKey))
+						{
+							this->vCmdTab[vKey]->fExitHelp(0);
+							return 1;
+						} // not a command
+						else
+						{
+							std::cerr
+								<< vKey << " - no help found for this;"
+								<< __LINE__ << std::endl;
+							this->fExitHelp(1);
+							return 0;
+						} // help for the command
 						return 0;
-					} // not a command
+					} // help for a command
 					else
 					{
-						this->vCmdTab[vKey]->fExitHelp(0);
+						this->fExitHelp(0);
 						return 1;
-					} // help for the command
-					return 0;
-				} // help for a command
-				else
+					} // just write our help
+				}
+				else if(this->vHelpText != "")
 				{
 					this->fExitHelp(0);
 					return 1;
-				} // just write our help
+				} // no option found - try the default help option
 				return 0;
 			} // not an option, not a command - try default help
 			this->vArgArr.push_back(vArg);
