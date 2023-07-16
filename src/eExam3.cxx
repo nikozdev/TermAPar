@@ -3,16 +3,11 @@
 // headers
 #include "lTermArgs.hxx"
 // datadef
-static constexpr auto vHelpText = R"([usage]=(
-[flags]=()
-[options]=()
-[commands]=()
-)=[usage])";
 // actions
 int main(int vArgC, char **vArgV)
 {
 	nTermArgs::tParser vParser;
-	vParser.fSetHelpText(vHelpText);
+	vParser.fRegOpt("config-file config-path config-file-path");
 	vParser.fParse(vArgC, vArgV);
 	vParser.fPrint();
 	return 0;

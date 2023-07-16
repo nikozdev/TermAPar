@@ -41,8 +41,8 @@ void fTestFlagEmptyInput()
 		vParser.fRegFlag("foo f");
 		vParser.fParse({});
 	});
-	dPrintAssert(vParser.fVetArg("foo") == false);
-	dPrintAssert(vParser.fGetArgCount("foo") == 0);
+	dPrintAssert(vParser.fVetFlag("foo") == false);
+	dPrintAssert(vParser.fGetOptCount("foo") == 0);
 	dPrintSuffix();
 } // fTestFlagEmptyInput
 void fTestFlagNotFound()
@@ -53,8 +53,8 @@ void fTestFlagNotFound()
 		vParser.fRegFlag("foo f");
 		vParser.fParse({ "abc", "def" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == false);
-	dPrintAssert(vParser.fGetArgCount("foo") == 0);
+	dPrintAssert(vParser.fVetFlag("foo") == false);
+	dPrintAssert(vParser.fGetFlagCount("foo") == 0);
 	dPrintSuffix();
 } // fTestFlagNotFound
 void fTestFlagL()
@@ -65,8 +65,8 @@ void fTestFlagL()
 		vParser.fRegFlag("foo f");
 		vParser.fParse({ "--foo" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 1);
+	dPrintAssert(vParser.fVetFlag("foo") == true);
+	dPrintAssert(vParser.fGetFlagCount("foo") == 1);
 	dPrintSuffix();
 } // fTestFlagL
 void fTestFlagS()
@@ -77,8 +77,8 @@ void fTestFlagS()
 		vParser.fRegFlag("foo f");
 		vParser.fParse({ "-f" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 1);
+	dPrintAssert(vParser.fVetFlag("foo") == true);
+	dPrintAssert(vParser.fGetFlagCount("foo") == 1);
 	dPrintSuffix();
 } // fTestFlagS
 void fTestFlagCondense()
@@ -89,8 +89,8 @@ void fTestFlagCondense()
 		vParser.fRegFlag("foo f");
 		vParser.fParse({ "-fff" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 3);
+	dPrintAssert(vParser.fVetFlag("foo") == true);
+	dPrintAssert(vParser.fGetFlagCount("foo") == 3);
 	dPrintSuffix();
 } // fTestFlagCondense
 void fTestFlagMultiple()
@@ -101,8 +101,8 @@ void fTestFlagMultiple()
 		vParser.fRegFlag("foo f");
 		vParser.fParse({ "-fff", "--foo", "-f" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 5);
+	dPrintAssert(vParser.fVetFlag("foo") == true);
+	dPrintAssert(vParser.fGetFlagCount("foo") == 5);
 	dPrintSuffix();
 } // fTestFlagMultiple
 void fTestFlag()
@@ -125,8 +125,8 @@ void fTestOptNotFound()
 		vParser.fRegOpt("foo f", "default");
 		vParser.fParse({ "abc", "def" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == false);
-	dPrintAssert(vParser.fGetArgCount("foo") == 0);
+	dPrintAssert(vParser.fVetOpt("foo") == false);
+	dPrintAssert(vParser.fGetOptCount("foo") == 0);
 	dPrintAssert(vParser.fGetOpt("foo") == "default");
 	dPrintSuffix();
 } // fTestOptNotFound
@@ -138,8 +138,8 @@ void fTestOptL()
 		vParser.fRegOpt("foo f", "default");
 		vParser.fParse({ "--foo", "bar" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 1);
+	dPrintAssert(vParser.fVetOpt("foo") == true);
+	dPrintAssert(vParser.fGetOptCount("foo") == 1);
 	dPrintAssert(vParser.fGetOpt("foo") == "bar");
 	dPrintSuffix();
 } // fTestOptL
@@ -151,8 +151,8 @@ void fTestOptS()
 		vParser.fRegOpt("foo f", "default");
 		vParser.fParse({ "-f", "bar" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 1);
+	dPrintAssert(vParser.fVetOpt("foo") == true);
+	dPrintAssert(vParser.fGetOptCount("foo") == 1);
 	dPrintAssert(vParser.fGetOpt("foo") == "bar");
 	dPrintSuffix();
 } // fTestOptS
@@ -164,8 +164,8 @@ void fTestOptCondense()
 		vParser.fRegOpt("foo f", "default");
 		vParser.fParse({ "-ff", "bar", "baz" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 2);
+	dPrintAssert(vParser.fVetOpt("foo") == true);
+	dPrintAssert(vParser.fGetOptCount("foo") == 2);
 	dPrintAssert(vParser.fGetOpt("foo") == "baz");
 	dPrintSuffix();
 } // fTestOptCondense
@@ -177,8 +177,8 @@ void fTestOptMultiple()
 		vParser.fRegOpt("foo f", "default");
 		vParser.fParse({ "-ff", "bar", "baz", "--foo", "bam" });
 	});
-	dPrintAssert(vParser.fVetArg("foo") == true);
-	dPrintAssert(vParser.fGetArgCount("foo") == 3);
+	dPrintAssert(vParser.fVetOpt("foo") == true);
+	dPrintAssert(vParser.fGetOptCount("foo") == 3);
 	dPrintAssert(vParser.fGetOpt("foo") == "bam");
 	dPrintSuffix();
 } // fTestOptMultiple
@@ -187,7 +187,7 @@ void fTestOptParseSwitch()
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
 	dPrintBlock({ vParser.fParse({ "foo", "--", "--bar", "--baz" }); });
-	dPrintAssert(vParser.vArgPak.size() == 3);
+	dPrintAssert(vParser.fGetArgPak().size() == 3);
 	dPrintSuffix();
 } // fTestOptParseSwitch
 void fTestOpt()
@@ -207,9 +207,9 @@ void fTestArgPak()
 	dPrintPrefix();
 	nTermArgs::tParser vParser;
 	dPrintBlock({ vParser.fParse({ "abc", "def" }); });
-	dPrintAssert(vParser.vArgPak.size() == 2);
-	dPrintAssert(vParser.vArgPak[0] == "abc");
-	dPrintAssert(vParser.vArgPak[1] == "def");
+	dPrintAssert(vParser.fGetArgPak().size() == 2);
+	dPrintAssert(vParser.fGetArgPak()[0] == "abc");
+	dPrintAssert(vParser.fGetArgPak()[1] == "def");
 	dPrintSuffix();
 } // fTestArgPak
 void fTestArg()
@@ -222,18 +222,17 @@ void fTestArg()
 void fTestCmd()
 {
 	dPrintPrefix();
-	nTermArgs::tParser	vParser;
-	nTermArgs::tParser &rParserCmd = vParser.fRegCmd("boo");
+	nTermArgs::tParser vParser;
+	auto			   pParserCmd = vParser.fRegCmd("boo");
 	dPrintBlock({
-		rParserCmd.fRegFlag("foo");
-		rParserCmd.fRegOpt("bar", "default");
+		pParserCmd->fRegFlag("foo");
+		pParserCmd->fRegOpt("bar", "default");
 		vParser.fParse({ "boo", "abc", "def", "--foo", "--bar", "baz" });
 	});
-	dPrintAssert(vParser.fVetCmd());
-	dPrintAssert(vParser.fGetCmdKey() == "boo");
-	dPrintAssert(rParserCmd.vArgPak.size() == 2);
-	dPrintAssert(rParserCmd.fVetArg("foo"));
-	dPrintAssert(rParserCmd.fGetOpt("bar") == "baz");
+	dPrintAssert(vParser.fVetCmd("boo"));
+	dPrintAssert(pParserCmd->fGetArgPak().size() == 2);
+	dPrintAssert(pParserCmd->fVetFlag("foo"));
+	dPrintAssert(pParserCmd->fGetOpt("bar") == "baz");
 	dPrintSuffix();
 } // fTestCmd
 // // main

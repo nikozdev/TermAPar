@@ -11,10 +11,13 @@ static void fCallback(const nTermArgs::tKey &rKey, nTermArgs::tParser &rParser)
 }
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tParser	vParser;
-	nTermArgs::tParser &rParserCmd = vParser.fRegCmd("boo");
-	rParserCmd.fRegFlag("foo f");
-	rParserCmd.fRegOpt("bar b foo f", "default");
+	nTermArgs::tParser vParser;
+	auto			   pParserCmd = vParser.fRegCmd("boo");
+	pParserCmd->fSetCallback(fCallback);
+	vParser.fRegFlag("var v");
+	vParser.fRegOpt("bar b");
+	pParserCmd->fRegFlag("foo f");
+	pParserCmd->fRegOpt("bar b foo f", "default");
 	vParser.fParse(vArgC, vArgV);
 	vParser.fPrint();
 	return 0;
