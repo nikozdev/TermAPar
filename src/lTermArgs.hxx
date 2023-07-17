@@ -427,9 +427,8 @@ public: // actions
 		{
 			const tKey &rK = rI.first;
 			const tOpt &rO = *rI.second;
-			std::cout << vIndentStr << " [" << rK << "]=(" << std::endl;
-			std::cout << vIndentStr << "  " << rO << std::endl;
-			std::cout << vIndentStr << " )=[" << rK << "]" << std::endl;
+			std::cout
+				<< vIndentStr << " [" << rK << "]=(" << rO << ")" << std::endl;
 		}
 		std::cout << vIndentStr << ")=[OptTab]" << std::endl;
 		std::cout << vIndentStr << "[ArgArr]=(" << std::endl;
@@ -448,7 +447,7 @@ private: // datadef
 	std::map<tKey, tCmdPtr> vCmdTab;
 	std::map<tKey, tOptPtr> vOptTab;
 	tArr					vArgArr;
-} tCmd; // command type
+} tArgParser, tCmd; // arg parser or the command type
 using tOptPtr = tCmd::tOptPtr;
 using tCmdPtr = tCmd::tCmdPtr;
 
