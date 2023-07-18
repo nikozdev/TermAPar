@@ -9,7 +9,7 @@ set(vProjNameL "l${vProjName}")
 set(vProjVnum ${PROJECT_VERSION})
 set(vProjDesc ${PROJECT_DESCRIPTION})
 # lang
-set(vLangVnum 20)
+set(vLangVnum 23)
 set(CMAKE_CXX_STANDARD ${vLangVnum})
 set(CMAKE_CXX_STANDARD_REQUIRED ${vLangVnum})
 # file
