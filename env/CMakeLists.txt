@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 # proj
 project(TermArgs
-    VERSION 3.0.2
+    VERSION 3.0.3
     DESCRIPTION "cli argument parsing single-header-only-library for cxx"
     ) # project
 set(vProjName ${PROJECT_NAME})
@@ -46,6 +46,17 @@ if(1)
         ) # set_tests_properties
     target_link_libraries(eTestUnit PRIVATE ${vProjNameL})
 endif()
+if(1)
+    add_executable(eTestTime ${vFileDirSrcTest}/eTime.cxx)
+    add_test(NAME tTime
+        COMMAND ${vFileDirGen}/eTestTime
+        ) # add_test
+    set_tests_properties(tTime PROPERTIES
+        TIMEOUT 16
+        ) # set_tests_properties
+    target_link_libraries(eTestTime PRIVATE ${vProjNameL})
+endif()
+# exam
 if(1)
     add_executable(eExamArg ${vFileDirSrcExam}/eArg.cxx)
     target_link_libraries(eExamArg PRIVATE ${vProjNameL})
