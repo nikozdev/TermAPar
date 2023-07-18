@@ -1,5 +1,5 @@
-#ifndef lTermArgsTestCxx
-#define lTermArgsTestCxx
+#ifndef lTermArgsTestUnitCxx
+#define lTermArgsTestUnitCxx
 // headers
 #include <cassert>
 #include <lTermArgs.hxx>
@@ -161,4 +161,4 @@ int main()
 {
 	return fTest();
 } // main
-#endif // lTermArgsTestCxx
+#endif // lTermArgsTestUnitCxx

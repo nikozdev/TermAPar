@@ -47,6 +47,17 @@ if(1)
     target_link_libraries(eTestUnit PRIVATE ${vProjNameL})
 endif()
 if(1)
+    add_executable(eTestTime ${vFileDirSrcTest}/eTime.cxx)
+    add_test(NAME tTime
+        COMMAND ${vFileDirGen}/eTestTime
+        ) # add_test
+    set_tests_properties(tTime PROPERTIES
+        TIMEOUT 16
+        ) # set_tests_properties
+    target_link_libraries(eTestTime PRIVATE ${vProjNameL})
+endif()
+# exam
+if(1)
     add_executable(eExamArg ${vFileDirSrcExam}/eArg.cxx)
     target_link_libraries(eExamArg PRIVATE ${vProjNameL})
     add_test(NAME tExamArg
