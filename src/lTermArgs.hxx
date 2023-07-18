@@ -416,7 +416,8 @@ public: // actions
 		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	bool fPrint(std::string vIndentStr = "") const
+	[[deprecated("use fmt::format, fmt::print instead")]] bool
+	fPrint(std::string vIndentStr = "") const
 	{
 		std::cout << vIndentStr << "[CmdTab]=(" << std::endl;
 		for(auto &rI: this->vCmdTab)
