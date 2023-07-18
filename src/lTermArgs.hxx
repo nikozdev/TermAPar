@@ -11,7 +11,6 @@
 
 #include <string>
 #include <iostream>
-#include <sstream>
 
 namespace nTermArgs
 {
@@ -36,8 +35,7 @@ std::ostream &operator<<(std::ostream &vStream, const std::vector<t> &vVector)
 
 // typedef
 
-using tStr		 = std::string;
-using tStrStream = std::stringstream;
+using tStr = std::string_view;
 
 using tArg = tStr;
 using tKey = tArg;
@@ -75,26 +73,26 @@ private: // datadef
 typedef class tCmd
 {
 public: // typedef
-	typedef void(tCallback)(const tKey &rKey, tCmd &rCmd);
+	typedef void(tCallback)(tCmd &rCmd);
 	using tCmdPtr = std::shared_ptr<tCmd>;
 	using tOptPtr = std::shared_ptr<tOpt>;
 public: // codetor
 	tCmd()	= default;
 	~tCmd() = default;
 public: // getters
-	tCmdPtr fGetCmdPtr(const tKey &rKey) const
+	tCmdPtr fGetCmdPtr(const tKey vKey) const
 	{
-		auto rI = this->vCmdTab.find(rKey);
+		auto rI = this->vCmdTab.find(vKey);
 		return (rI == this->vCmdTab.end()) ? rI->second : tCmdPtr{};
 	} // fGetCmdPtr
-	tOptPtr fGetOptPtr(const tKey &rKey) const
+	tOptPtr fGetOptPtr(const tKey vKey) const
 	{
-		auto rI = this->vOptTab.find(rKey);
+		auto rI = this->vOptTab.find(vKey);
 		return (rI == this->vOptTab.end()) ? rI->second : tOptPtr{};
 	} // fGetOptPtr
-	tOpt fGetOptVal(const tKey &rKey) const
+	tOpt fGetOptVal(const tKey vKey) const
 	{
-		return this->fVetOptKey(rKey) ? *this->vOptTab.find(rKey)->second : tOpt{};
+		return this->fVetOptKey(vKey) ? *this->vOptTab.find(vKey)->second : tOpt{};
 	} // fGetOptVal
 	auto fGetArgVal(const size_t vKey) const
 	{
@@ -109,22 +107,21 @@ public: // vetters
 	{
 		return this->vCmdTab.empty() != vVet;
 	} // fVetCmdTab
-	bool fVetCmdKey(const tKey &rKey, const bool vVet = 1) const
+	bool fVetCmdKey(const tKey vKey, const bool vVet = 1) const
 	{
-		return (this->vCmdTab.find(rKey) != this->vCmdTab.end()) == vVet;
+		return (this->vCmdTab.find(vKey) != this->vCmdTab.end()) == vVet;
 	} // fVetCmdKey
 	bool fVetOptTab(const bool vVet = 1) const
 	{
 		return this->vOptTab.empty() != vVet;
 	} // fVetOptTab
-	bool fVetOptKey(const tKey &rKey, const bool vSet = 1) const
+	bool fVetOptKey(const tKey vKey, const bool vSet = 1) const
 	{
-		return (this->vOptTab.find(rKey) != this->vOptTab.end()) == vSet;
+		return (this->vOptTab.find(vKey) != this->vOptTab.end()) == vSet;
 	} // fVetOptKey
-	bool
-	fVetOptVal(const tKey &rKey, const tOpt &rOpt, const bool vVet = 1) const
+	bool fVetOptVal(const tKey vKey, const tOpt &rOpt, const bool vVet = 1) const
 	{
-		auto  rI   = this->vOptTab.find(rKey);
+		auto  rI   = this->vOptTab.find(vKey);
 		auto &rPtr = (rI->second);
 		return (rI == this->vOptTab.end() ? 0 : (*rPtr == rOpt)) == vVet;
 	} // fVetOptVal
@@ -148,26 +145,30 @@ public: // setters
 		this->pCallback = pCallback;
 		return *this;
 	} // fSetCallback
-	auto fSetCmd(const tKey &rKey, tCallback *pCallback = nullptr)
+	auto fSetCmd(const tKey vKey, tCallback *pCallback = nullptr)
 	{
 		tCmdPtr pCmd = std::make_shared<tCmd>();
 		pCmd->fSetCallback(pCallback);
-		tStrStream vStream(rKey);
-		tStr	   vKey;
-		while(vStream >> vKey)
+		tKey::size_type vPosWas = 0, vPosNow = 0;
+		while(vPosNow != std::string::npos)
 		{
-			this->vCmdTab[vKey] = pCmd;
+			vPosNow		  = vKey.find(" ", vPosWas);
+			tKey vSub	  = vKey.substr(vPosWas, vPosNow - vPosWas);
+			vCmdTab[vSub] = pCmd;
+			vPosWas		  = vPosNow + 1;
 		}
 		return pCmd;
 	} // fSetCmd
-	auto fSetOpt(const tKey &rKey, const tStr &rDef = "")
+	auto fSetOpt(const tKey vKey, const tStr &rDef = "")
 	{
-		tOptPtr	   pOpt = std::make_shared<tOpt>(rDef);
-		tStrStream vStream(rKey);
-		tStr	   vKey;
-		while(vStream >> vKey)
+		tOptPtr			pOpt	= std::make_shared<tOpt>(rDef);
+		tKey::size_type vPosWas = 0, vPosNow;
+		while(vPosNow != std::string::npos)
 		{
-			this->vOptTab[vKey] = pOpt;
+			vPosNow		  = vKey.find(" ", vPosWas);
+			tKey vSub	  = vKey.substr(vPosWas, vPosNow - vPosWas);
+			vOptTab[vSub] = pOpt;
+			vPosWas		  = vPosNow + 1;
 		}
 		return pOpt;
 	}	 // fSetOpt
@@ -177,27 +178,27 @@ private: // actions
 		std::cout << this->vHelpText << std::endl;
 		return exit(vCode);
 	} // fExitHelp
-	bool fParseOptE(const tArg &rPfx, const tKey &rKey, const tArg &rArg)
+	bool fParseOptE(const tArg &rPfx, const tKey &vKey, const tArg &rArg)
 	{
-		if(this->fVetOptKey(rKey))
+		if(this->fVetOptKey(vKey))
 		{
 			if(rArg.empty())
 			{
 				std::cerr
-					<< "missing value for " << rPfx << rKey << ";" << __LINE__
+					<< "missing value for " << rPfx << vKey << ";" << __LINE__
 					<< std::endl;
 				this->fExitHelp(1);
 				return 0;
 			}
 			else
 			{
-				*this->vOptTab[rKey] = rArg;
+				*this->vOptTab[vKey] = rArg;
 			}
 		} // found option
 		else
 		{
 			std::cerr
-				<< rPfx << rKey << " - is not an option;" << __LINE__
+				<< rPfx << vKey << " - is not an option;" << __LINE__
 				<< std::endl;
 			this->fExitHelp(1);
 			return 0;
@@ -251,9 +252,9 @@ private: // actions
 			tArg vVal = rArg.substr(vPos + 1);
 			return fParseOptE("-", vKey, vVal);
 		} // -o=v
-		for(auto &rI: rArg)
+		for(auto vI = 0; vI < rArg.length(); vI++)
 		{ // iterate over all short options
-			tKey vKey = tStr(1, rI);
+			tKey vKey = rArg.substr(vI, 1);
 			if(this->fVetOptKey(vKey))
 			{
 				if(rArgStream.fVet())
@@ -266,20 +267,20 @@ private: // actions
 					if(rArg.size() > 1)
 					{
 						std::cerr
-							<< "missing argument for '" << rI << "' in -"
+							<< "missing argument for '" << vKey << "' in -"
 							<< rArg << ";" << __LINE__ << std::endl;
 					}
 					else
 					{
 						std::cerr
-							<< "missing argument for -" << rI << ";" << __LINE__
-							<< std::endl;
+							<< "missing argument for -" << vKey << ";"
+							<< __LINE__ << std::endl;
 					}
 					this->fExitHelp(1);
 					return 0;
 				}
 			} // found option
-			else if(rI == 'h' && this->vHelpText != "")
+			else if(vKey == "h" && this->vHelpText != "")
 			{
 				this->fExitHelp(0);
 				return 1;
@@ -287,12 +288,12 @@ private: // actions
 			else if(rArg.size() > 1)
 			{
 				std::cerr
-					<< rI << rArg << " is not an option;" << __LINE__
+					<< vI << rArg << " is not an option;" << __LINE__
 					<< std::endl;
 			}
 			else
 			{
-				std::cerr << rI << " - is not an option;" << __LINE__ << std::endl;
+				std::cerr << vI << " - is not an option;" << __LINE__ << std::endl;
 			}
 			this->fExitHelp(1);
 			return 0;
@@ -341,7 +342,7 @@ private: // actions
 				pCmd->fParse(rArgStream);
 				if(pCmd->pCallback)
 				{
-					pCmd->pCallback(vArg, *pCmd);
+					pCmd->pCallback(*pCmd);
 				}
 			} // command
 			else if(vArgIs1st && vArg == "help")
@@ -410,25 +411,25 @@ public: // actions
 		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	bool fPrint(tStr vIndentStr = "") const
+	bool fPrint(std::string vIndentStr = "") const
 	{
 		std::cout << vIndentStr << "[CmdTab]=(" << std::endl;
 		for(auto &rI: this->vCmdTab)
 		{
-			const tKey &rK = rI.first;
+			const tKey	vK = rI.first;
 			const tCmd &rC = *rI.second;
-			std::cout << vIndentStr << " [" << rK << "]=(" << std::endl;
+			std::cout << vIndentStr << " [" << vK << "]=(" << std::endl;
 			rC.fPrint(vIndentStr + "  ");
-			std::cout << vIndentStr << " )=[" << rK << "]" << std::endl;
+			std::cout << vIndentStr << " )=[" << vK << "]" << std::endl;
 		}
 		std::cout << vIndentStr << ")=[CmdTab]" << std::endl;
 		std::cout << vIndentStr << "[OptTab]=(" << std::endl;
 		for(auto &rI: this->vOptTab)
 		{
-			const tKey &rK = rI.first;
+			const tKey	vK = rI.first;
 			const tOpt &rO = *rI.second;
 			std::cout
-				<< vIndentStr << " [" << rK << "]=(" << rO << ")" << std::endl;
+				<< vIndentStr << " [" << vK << "]=(" << rO << ")" << std::endl;
 		}
 		std::cout << vIndentStr << ")=[OptTab]" << std::endl;
 		std::cout << vIndentStr << "[ArgArr]=(" << std::endl;
