@@ -28,7 +28,7 @@ static constexpr auto vHelpTextCmd = dTermArgsProjName R"(
 > whatever else you can imagine
 )"; // HelpTextCmd
 // actions
-static void fCallback(const nTermArgs::tKey &rKey, nTermArgs::tCmd &rCmd)
+static void fCallback(nTermArgs::tCmd &rCmd)
 {
 	rCmd.fPrint();
 }
