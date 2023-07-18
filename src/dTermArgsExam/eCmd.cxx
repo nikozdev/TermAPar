@@ -30,7 +30,7 @@ static constexpr auto vHelpTextCmd = dTermArgsProjName R"(
 // actions
 static void fCallback(nTermArgs::tCmd &rCmd)
 {
-	rCmd.fPrint();
+	fmt::println("[0]={1}=[0]", "Cmd", rCmd);
 }
 int main(int vArgC, char **vArgV)
 {
@@ -41,7 +41,7 @@ int main(int vArgC, char **vArgV)
 	pArgParserCmd->fSetCallback(fCallback);
 	pArgParserCmd->fSetOpt("o opt", "val");
 	vArgParser.fParse(vArgC, vArgV);
-	vArgParser.fPrint();
+	fmt::println("[0]={1}=[0]", "ArgParser", vArgParser);
 	return 0;
 }
 #endif // lTermArgsExamCmdCxx
