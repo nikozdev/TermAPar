@@ -27,7 +27,7 @@ int main(int vArgC, char **vArgV)
 	vArgParser.fSetHelpText(vHelpText);
 	vArgParser.fSetOpt("opt o", "val");
 	vArgParser.fParse(vArgC, vArgV);
-	vArgParser.fPrint();
+	fmt::println("[0]={1}=[0]", "ArgParser", vArgParser);
 	return 0;
 } // main
 #endif // lTermArgsExamOptCxx

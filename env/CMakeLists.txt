@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 # proj
 project(TermArgs
-    VERSION 3.0.3
+    VERSION 3.1.0
     DESCRIPTION "cli argument parsing single-header-only-library for cxx"
     ) # project
 set(vProjName ${PROJECT_NAME})
@@ -9,7 +9,7 @@ set(vProjNameL "l${vProjName}")
 set(vProjVnum ${PROJECT_VERSION})
 set(vProjDesc ${PROJECT_DESCRIPTION})
 # lang
-set(vLangVnum 20)
+set(vLangVnum 23)
 set(CMAKE_CXX_STANDARD ${vLangVnum})
 set(CMAKE_CXX_STANDARD_REQUIRED ${vLangVnum})
 # file
@@ -18,6 +18,8 @@ set(vFileDirSrc ${vFileDirLoc}/src)
 set(vFileDirSrcTest ${vFileDirLoc}/src/d${vProjName}Test)
 set(vFileDirSrcExam ${vFileDirLoc}/src/d${vProjName}Exam)
 set(vFileDirGen ${vFileDirLoc}/gen)
+# libs
+find_package(fmt CONFIG REQUIRED)
 # make
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(${vProjNameL} INTERFACE)
@@ -29,6 +31,7 @@ target_compile_definitions(${vProjNameL} INTERFACE
     "d${vProjName}ProjDesc=\"${vProjDesc}\""
     ) # target_compile_definitions
 target_include_directories(${vProjNameL} INTERFACE ${vFileDirSrc})
+target_link_libraries(${vProjNameL} INTERFACE fmt::fmt)
 # test
 enable_testing()
 if(1)

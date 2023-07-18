@@ -12,6 +12,8 @@
 #include <string>
 #include <iostream>
 
+#include "fmt/format.h"
+
 namespace nTermArgs
 {
 
@@ -37,10 +39,10 @@ std::ostream &operator<<(std::ostream &vStream, const std::vector<t> &vVector)
 
 using tStr = std::string_view;
 
-using tArg = tStr;
-using tKey = tArg;
-using tOpt = tArg;
-using tArr = std::vector<tArg>;
+using tArg	  = tStr;
+using tKey	  = tArg;
+using tOpt	  = tArg;
+using tArgArr = std::vector<tArg>;
 
 typedef struct tArgStream
 {
@@ -75,7 +77,10 @@ typedef class tCmd
 public: // typedef
 	typedef void(tCallback)(tCmd &rCmd);
 	using tCmdPtr = std::shared_ptr<tCmd>;
+	using tCmdTab = std::map<tKey, tCmdPtr>;
 	using tOptPtr = std::shared_ptr<tOpt>;
+	using tOptTab = std::map<tKey, tOptPtr>;
+	friend class fmt::formatter<tCmd>;
 public: // codetor
 	tCmd()	= default;
 	~tCmd() = default;
@@ -175,7 +180,7 @@ public: // setters
 private: // actions
 	auto fExitHelp(int vCode = 0)
 	{
-		std::cout << this->vHelpText << std::endl;
+		fmt::print(stdout, "{}", this->vHelpText);
 		return exit(vCode);
 	} // fExitHelp
 	bool fParseOptE(const tArg &rPfx, const tKey &vKey, const tArg &rArg)
@@ -401,7 +406,7 @@ public: // actions
 		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	bool fParse(const tArr &rArr)
+	bool fParse(const tArgArr &rArr)
 	{
 		tArgStream vArgStream;
 		for(const tArg &rArg: rArr)
@@ -411,7 +416,8 @@ public: // actions
 		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	bool fPrint(std::string vIndentStr = "") const
+	[[deprecated("use fmt::format, fmt::print instead")]] bool
+	fPrint(std::string vIndentStr = "") const
 	{
 		std::cout << vIndentStr << "[CmdTab]=(" << std::endl;
 		for(auto &rI: this->vCmdTab)
@@ -443,15 +449,61 @@ public: // actions
 		return 1;
 	}	 // fPrint
 private: // datadef
-	tStr					vHelpText;
-	tCallback			   *pCallback;
-	std::map<tKey, tCmdPtr> vCmdTab;
-	std::map<tKey, tOptPtr> vOptTab;
-	tArr					vArgArr;
+	tStr	   vHelpText;
+	tCallback *pCallback;
+	tCmdTab	   vCmdTab;
+	tOptTab	   vOptTab;
+	tArgArr	   vArgArr;
 } tArgParser, tCmd; // arg parser or the command type
 using tOptPtr = tCmd::tOptPtr;
 using tCmdPtr = tCmd::tCmdPtr;
 
 } // namespace nTermArgs
+
+namespace fmt
+{
+// typedef
+template<>
+class formatter<::nTermArgs::tCmd>
+{
+public: // typedef
+	using tVal = nTermArgs::tCmd;
+public: // actions
+	template<typename tCtx>
+	constexpr auto parse(tCtx &rCtx)
+	{
+		for(auto vI = rCtx.begin(); vI != rCtx.end(); vI++)
+		{
+		}
+		return rCtx.end();
+	} // parse
+	template<typename tCtx>
+	constexpr auto format(const tVal &rVal, tCtx &rCtx) const
+	{
+		fmt::format_to(rCtx.out(), "(");
+		fmt::format_to(rCtx.out(), "[{0}]=(", "ArgArr");
+		for(auto vI = 0; vI < rVal.vArgArr.size(); vI++)
+		{
+			fmt::format_to(rCtx.out(), "[{0}]=({1})=[{0}]", vI, rVal.vArgArr[vI]);
+		}
+		fmt::format_to(rCtx.out(), ")=[{0}]", "ArgArr");
+		fmt::format_to(rCtx.out(), "[{0}]=(", "OptTab");
+		for(auto vI: rVal.vOptTab)
+		{
+			fmt::format_to(rCtx.out(), "[{0}]=({1})=[{0}]", vI.first, *vI.second);
+		}
+		fmt::format_to(rCtx.out(), ")=[{0}]", "OptTab");
+		fmt::format_to(rCtx.out(), "[{0}]=(", "CmdTab");
+		for(auto vI: rVal.vCmdTab)
+		{
+			fmt::format_to(rCtx.out(), "[{0}]=({1})=[{0}]", vI.first, *vI.second);
+		}
+		fmt::format_to(rCtx.out(), ")=[{0}]", "CmdTab");
+		return fmt::format_to(rCtx.out(), ")");
+	}	 // format
+private: // datadef
+	bool _;
+}; // cmd formatter
+} // namespace fmt
 
 #endif // dTermArgsHxx
