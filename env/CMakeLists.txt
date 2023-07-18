@@ -18,6 +18,8 @@ set(vFileDirSrc ${vFileDirLoc}/src)
 set(vFileDirSrcTest ${vFileDirLoc}/src/d${vProjName}Test)
 set(vFileDirSrcExam ${vFileDirLoc}/src/d${vProjName}Exam)
 set(vFileDirGen ${vFileDirLoc}/gen)
+# libs
+find_package(fmt CONFIG REQUIRED)
 # make
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(${vProjNameL} INTERFACE)
@@ -29,6 +31,7 @@ target_compile_definitions(${vProjNameL} INTERFACE
     "d${vProjName}ProjDesc=\"${vProjDesc}\""
     ) # target_compile_definitions
 target_include_directories(${vProjNameL} INTERFACE ${vFileDirSrc})
+target_link_libraries(${vProjNameL} INTERFACE fmt::fmt)
 # test
 enable_testing()
 if(1)
