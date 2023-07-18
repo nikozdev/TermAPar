@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
+# mods
+include(mRegex.cmake)
 # proj
 project(TermArgs
     VERSION 3.1.1
@@ -40,10 +42,7 @@ if(1)
         COMMAND ${vFileDirGen}/eTestUnit
         ) # add_test
     set(vPassRegex ".*)=[fTest]")
-    string(REPLACE "(" "\\(" vPassRegex ${vPassRegex})
-    string(REPLACE ")" "\\)" vPassRegex ${vPassRegex})
-    string(REPLACE "[" "\\[" vPassRegex ${vPassRegex})
-    string(REPLACE "]" "\\]" vPassRegex ${vPassRegex})
+    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
     set_tests_properties(tUnit PROPERTIES
         PASS_REGULAR_EXPRESSION ${vPassRegex}
         ) # set_tests_properties
@@ -67,10 +66,7 @@ if(1)
         COMMAND ${vFileDirGen}/eExamArg a1 -- a2
         ) # add_test
     set(vPassRegex "[ArgArr]=(.*[0]=(a1).*[1]=(a2).*)=[ArgArr]")
-    string(REPLACE "(" "\\(" vPassRegex ${vPassRegex})
-    string(REPLACE ")" "\\)" vPassRegex ${vPassRegex})
-    string(REPLACE "[" "\\[" vPassRegex ${vPassRegex})
-    string(REPLACE "]" "\\]" vPassRegex ${vPassRegex})
+    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
     set_tests_properties(tExamArg PROPERTIES
         PASS_REGULAR_EXPRESSION ${vPassRegex}
         ) # set_tests_properties
@@ -82,10 +78,7 @@ if(1)
         COMMAND ${vFileDirGen}/eExamOpt -o=1 a1 -- a2 -- -o=2
         ) # add_test
     set(vPassRegex ".*[OptTab]=(.*[o]=(2).*[opt]=(2).*)=[OptTab]")
-    string(REPLACE "(" "\\(" vPassRegex ${vPassRegex})
-    string(REPLACE ")" "\\)" vPassRegex ${vPassRegex})
-    string(REPLACE "[" "\\[" vPassRegex ${vPassRegex})
-    string(REPLACE "]" "\\]" vPassRegex ${vPassRegex})
+    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
     set_tests_properties(tExamOpt PROPERTIES
         PASS_REGULAR_EXPRESSION ${vPassRegex}
         ) # set_tests_properties
@@ -97,10 +90,7 @@ if(1)
         COMMAND ${vFileDirGen}/eExamCmd cmd -o=1 a1 -- a2 -- -o=2
         ) # add_test
     set(vPassRegex ".*[CmdTab]=(.*[c]=(.*)=[c].*[cmd]=(.*)=[cmd].*)=[CmdTab]")
-    string(REPLACE "(" "\\(" vPassRegex ${vPassRegex})
-    string(REPLACE ")" "\\)" vPassRegex ${vPassRegex})
-    string(REPLACE "[" "\\[" vPassRegex ${vPassRegex})
-    string(REPLACE "]" "\\]" vPassRegex ${vPassRegex})
+    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
     set_tests_properties(tExamCmd PROPERTIES
         PASS_REGULAR_EXPRESSION ${vPassRegex}
         ) # set_tests_properties
