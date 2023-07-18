@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 # proj
 project(TermArgs
-    VERSION 3.0.2
+    VERSION 3.0.3
     DESCRIPTION "cli argument parsing single-header-only-library for cxx"
     ) # project
 set(vProjName ${PROJECT_NAME})
