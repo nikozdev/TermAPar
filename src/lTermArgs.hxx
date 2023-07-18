@@ -472,6 +472,9 @@ public: // actions
 	template<typename tCtx>
 	constexpr auto parse(tCtx &rCtx)
 	{
+		for(auto vI = rCtx.begin(); vI != rCtx.end(); vI++)
+		{
+		}
 		return rCtx.end();
 	} // parse
 	template<typename tCtx>
@@ -499,7 +502,7 @@ public: // actions
 		return fmt::format_to(rCtx.out(), ")");
 	}	 // format
 private: // datadef
-	int vIndentNum = 0;
+	bool _;
 }; // cmd formatter
 } // namespace fmt
 
