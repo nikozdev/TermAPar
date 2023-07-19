@@ -19,7 +19,7 @@ int main(int vArgC, char **vArgV)
 	nTermArgs::tArgParser vArgParser;
 	vArgParser.fSetHelpText(vHelpText);
 	vArgParser.fParse(vArgC, vArgV);
-	fmt::println("[0]={1}=[0]", "ArgParser", vArgParser);
+	nTermArgs::nFormat::println("[0]={1}=[0]", "ArgParser", vArgParser);
 	return 0;
 } // main
 #endif // lTermArgsExamArgCxx

@@ -12,7 +12,20 @@
 #include <string>
 #include <iostream>
 
-#include "fmt/format.h"
+#ifdef dTermArgsLibsPickFormatFmt
+#	include "fmt/format.h"
+namespace nTermArgs
+{
+namespace nFormat = ::fmt;
+} // namespace nTermArgs
+#endif // dTermArgsLibsPickFormatFmt
+#ifdef dTermArgsLibsPickFormatStd
+#	include <format>
+namespace nTermArgs
+{
+namespace nFormat = std;
+} // namespace nTermArgs
+#endif // dTermArgsLibsPickFormatStd
 
 namespace nTermArgs
 {
@@ -80,7 +93,7 @@ public: // typedef
 	using tCmdTab = std::map<tKey, tCmdPtr>;
 	using tOptPtr = std::shared_ptr<tOpt>;
 	using tOptTab = std::map<tKey, tOptPtr>;
-	friend class fmt::formatter<tCmd>;
+	friend class nFormat::formatter<tCmd>;
 public: // codetor
 	tCmd()	= default;
 	~tCmd() = default;
@@ -180,7 +193,7 @@ public: // setters
 private: // actions
 	auto fExitHelp(int vCode = 0)
 	{
-		fmt::print(stdout, "{}", this->vHelpText);
+		nFormat::print(stdout, "{}", this->vHelpText);
 		return exit(vCode);
 	} // fExitHelp
 	bool fParseOptE(const tArg &rPfx, const tKey &vKey, const tArg &rArg)
@@ -416,7 +429,7 @@ public: // actions
 		this->fParse(vArgStream);
 		return 1;
 	} // fParse
-	[[deprecated("use fmt::format, fmt::print instead")]] bool
+	[[deprecated("use nFormat::format, nFormat::print instead")]] bool
 	fPrint(std::string vIndentStr = "") const
 	{
 		std::cout << vIndentStr << "[CmdTab]=(" << std::endl;
@@ -460,14 +473,12 @@ using tCmdPtr = tCmd::tCmdPtr;
 
 } // namespace nTermArgs
 
-namespace fmt
-{
 // typedef
 template<>
-class formatter<::nTermArgs::tCmd>
+class ::nTermArgs::nFormat::formatter<::nTermArgs::tCmd>
 {
 public: // typedef
-	using tVal = nTermArgs::tCmd;
+	using tVal = ::nTermArgs::tCmd;
 public: // actions
 	template<typename tCtx>
 	constexpr auto parse(tCtx &rCtx)
@@ -480,30 +491,36 @@ public: // actions
 	template<typename tCtx>
 	constexpr auto format(const tVal &rVal, tCtx &rCtx) const
 	{
-		fmt::format_to(rCtx.out(), "(");
-		fmt::format_to(rCtx.out(), "[{0}]=(", "ArgArr");
+		using namespace nTermArgs;
+		nFormat::format_to(rCtx.out(), "(");
+		nFormat::format_to(rCtx.out(), "[{0}]=(", "ArgArr");
 		for(auto vI = 0; vI < rVal.vArgArr.size(); vI++)
 		{
-			fmt::format_to(rCtx.out(), "[{0}]=({1})=[{0}]", vI, rVal.vArgArr[vI]);
+			nFormat::format_to(
+				rCtx.out(), "[{0}]=({1})=[{0}]", vI, rVal.vArgArr[vI]
+			);
 		}
-		fmt::format_to(rCtx.out(), ")=[{0}]", "ArgArr");
-		fmt::format_to(rCtx.out(), "[{0}]=(", "OptTab");
+		nFormat::format_to(rCtx.out(), ")=[{0}]", "ArgArr");
+		nFormat::format_to(rCtx.out(), "[{0}]=(", "OptTab");
 		for(auto vI: rVal.vOptTab)
 		{
-			fmt::format_to(rCtx.out(), "[{0}]=({1})=[{0}]", vI.first, *vI.second);
+			nFormat::format_to(
+				rCtx.out(), "[{0}]=({1})=[{0}]", vI.first, *vI.second
+			);
 		}
-		fmt::format_to(rCtx.out(), ")=[{0}]", "OptTab");
-		fmt::format_to(rCtx.out(), "[{0}]=(", "CmdTab");
+		nFormat::format_to(rCtx.out(), ")=[{0}]", "OptTab");
+		nFormat::format_to(rCtx.out(), "[{0}]=(", "CmdTab");
 		for(auto vI: rVal.vCmdTab)
 		{
-			fmt::format_to(rCtx.out(), "[{0}]=({1})=[{0}]", vI.first, *vI.second);
+			nFormat::format_to(
+				rCtx.out(), "[{0}]=({1})=[{0}]", vI.first, *vI.second
+			);
 		}
-		fmt::format_to(rCtx.out(), ")=[{0}]", "CmdTab");
-		return fmt::format_to(rCtx.out(), ")");
+		nFormat::format_to(rCtx.out(), ")=[{0}]", "CmdTab");
+		return nFormat::format_to(rCtx.out(), ")");
 	}	 // format
 private: // datadef
 	bool _;
 }; // cmd formatter
-} // namespace fmt
 
 #endif // dTermArgsHxx
