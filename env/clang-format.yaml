@@ -57,7 +57,7 @@ BraceWrapping: # break line after these triggers
   SplitEmptyRecord:      true # class\n{\n}
   SplitEmptyNamespace:   true # namespace name\n{\n}
 # BracedInitializerIndentWidth: 4 # let it be ContinuationIndentWidth
-BreakAfterAttributes: Never # [[]]; Always/Leave/Never
+BreakAfterAttributes: Always # [[]]; Always/Leave/Never
 BreakArrays: true # [ 1, 2, 3, 4, ] vs [ 1,\n 2,\n 3,\n 4,\n ]
 BreakBeforeConceptDeclarations: Always # template<...>\nConcept c = ...;
 BreakBeforeTernaryOperators: true # expr\n?lhs\n:rhs;
@@ -69,8 +69,8 @@ Cpp11BracedListStyle: true # write it like functions
 PointerAlignment:       Right # tInt *pInt;
 DerivePointerAlignment: false # do the most thing the file has with &*
 ReferenceAlignment:     Right
-EmptyLineAfterAccessModifier: Never # public:\n<content>
-EmptyLineBeforeAccessModifier: Never # \npublic:
+EmptyLineAfterAccessModifier: Always # public:\n<content>
+EmptyLineBeforeAccessModifier: Always # \npublic:
 ExperimentalAutoDetectBinPacking: false #
 FixNamespaceComments: true # namespace a {} // namespace a
 IncludeBlocks:     Preserve # include <...> grouping by lines

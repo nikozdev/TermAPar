@@ -5,7 +5,7 @@ include(cmake/mHelpRegex.cmake)
 include(cmake/mHelpOpt.cmake)
 # proj
 project(TermArgs
-    VERSION 3.1.1
+    VERSION 3.2.0
     DESCRIPTION "cli argument parsing single-header-only-library for cxx"
     ) # project
 enable_language(CXX)

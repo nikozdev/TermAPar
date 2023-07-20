@@ -55,11 +55,11 @@ void fTestOptNotFound()
 	dPrintPrefix();
 	nTermArgs::tArgParser vArgParser;
 	dPrintBlock({
-		vArgParser.fSetOpt("foo f", "default");
+		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"abc", "def"});
 	});
 	dPrintAssert(vArgParser.fVetOptKey("foo", 1));
-	dPrintAssert(vArgParser.fVetOptVal("foo", "default"));
+	dPrintAssert(vArgParser.fVetOptVal("foo", "val"));
 	dPrintSuffix();
 } // fTestOptNotFound
 void fTestOptL()
@@ -67,7 +67,7 @@ void fTestOptL()
 	dPrintPrefix();
 	nTermArgs::tArgParser vArgParser;
 	dPrintBlock({
-		vArgParser.fSetOpt("foo f", "default");
+		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"--foo", "bar"});
 	});
 	dPrintAssert(vArgParser.fVetOptKey("foo", 1));
@@ -79,11 +79,11 @@ void fTestOptS()
 	dPrintPrefix();
 	nTermArgs::tArgParser vArgParser;
 	dPrintBlock({
-		vArgParser.fSetOpt("foo f", "default");
+		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"-f", "bar"});
 	});
-	dPrintAssert(vArgParser.fVetOptKey("foo", 1));
-	dPrintAssert(vArgParser.fVetOptVal("foo", "bar"));
+	dPrintAssert(vArgParser.fVetOptKey("f", 1));
+	dPrintAssert(vArgParser.fVetOptVal("f", "bar"));
 	dPrintSuffix();
 } // fTestOptS
 void fTestOptCondense()
@@ -91,11 +91,11 @@ void fTestOptCondense()
 	dPrintPrefix();
 	nTermArgs::tArgParser vArgParser;
 	dPrintBlock({
-		vArgParser.fSetOpt("foo f", "default");
+		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"-ff", "bar", "baz"});
 	});
-	dPrintAssert(vArgParser.fVetOptKey("foo", 1));
-	dPrintAssert(vArgParser.fVetOptVal("foo", "baz"));
+	dPrintAssert(vArgParser.fVetOptKey("f", 1));
+	dPrintAssert(vArgParser.fVetOptVal("f", "baz"));
 	dPrintSuffix();
 } // fTestOptCondense
 void fTestOptMultiple()
@@ -103,7 +103,7 @@ void fTestOptMultiple()
 	dPrintPrefix();
 	nTermArgs::tArgParser vArgParser;
 	dPrintBlock({
-		vArgParser.fSetOpt("foo f", "default");
+		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"-ff", "bar", "baz", "--foo", "bam"});
 	});
 	dPrintAssert(vArgParser.fVetOptKey("foo", 1));
@@ -136,8 +136,8 @@ void fTestCmd()
 	nTermArgs::tArgParser vArgParser;
 	auto				  pArgParserCmd = vArgParser.fSetCmd("boo");
 	dPrintBlock({
-		pArgParserCmd->fSetOpt("foo", "none");
-		pArgParserCmd->fSetOpt("bar", "default");
+		pArgParserCmd->fSetOpt("foo", "val");
+		pArgParserCmd->fSetOpt("bar", "val");
 		vArgParser.fParse({"boo", "abc", "def", "--foo", "for", "--bar", "baz"}
 		);
 	});
