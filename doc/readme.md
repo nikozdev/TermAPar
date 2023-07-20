@@ -1,3 +1,5 @@
-# lTermArgs
-- command-line-argument-parsing library for cxx
-- originally this is a fork from dmulholl/argspp.git
+# TermAPar
+- terminal argument parser
+- single-header-only cxx library
+- originally forked from dmulholl/argspp.git
+> majorly refined and remade in the style of nikozdev

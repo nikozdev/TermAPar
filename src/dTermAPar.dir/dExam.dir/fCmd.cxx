@@ -1,16 +1,16 @@
-#ifndef lTermArgsExamCmdCxx
-#define lTermArgsExamCmdCxx
+#ifndef lTermAParExamCmdCxx
+#define lTermAParExamCmdCxx
 // headers
-#include <lTermArgs.hxx>
+#include <dTermAPar.dir/fMain.hxx>
 // datadef
-static constexpr auto vHelpText	   = dTermArgsProjName R"(
+static constexpr auto vHelpText	   = dTermAParProjName R"(
 - i am a command parser
 > missing options
 > reading commands
 - you can call me like this ...
 > {0} [(cmd|c)] <cmd-things>
 )";
-static constexpr auto vHelpTextCmd = dTermArgsProjName R"(
+static constexpr auto vHelpTextCmd = dTermAParProjName R"(
 - i am an argument and option parser
 > reading arguments
 > reading options
@@ -28,20 +28,20 @@ static constexpr auto vHelpTextCmd = dTermArgsProjName R"(
 > whatever else you can imagine
 )"; // HelpTextCmd
 // actions
-static void fCallback(nTermArgs::tCmd &rCmd)
+static bool fCmdFun(nTermAPar::tCmd &rCmd)
 {
-	nTermArgs::nFormat::println("[0]={1}=[0]", "Cmd", rCmd);
+	nTermAPar::nFormat::println("[0]={1}=[0]", "Cmd", rCmd);
+	return 1;
 }
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	vArgParser.fSetHelpText(vHelpText);
-	nTermArgs::tCmdPtr pArgParserCmd = vArgParser.fSetCmd("c cmd");
+	nTermAPar::tCmdPtr pArgParserCmd = vArgParser.fSetCmd("c cmd", fCmdFun);
 	pArgParserCmd->fSetHelpText(vHelpTextCmd);
-	pArgParserCmd->fSetCallback(fCallback);
 	pArgParserCmd->fSetOpt("o opt", "val");
 	vArgParser.fParse(vArgC, vArgV);
-	nTermArgs::nFormat::println("[0]={1}=[0]", "ArgParser", vArgParser);
+	nTermAPar::nFormat::println("[0]={1}=[0]", "ArgParser", vArgParser);
 	return 0;
 }
-#endif // lTermArgsExamCmdCxx
+#endif // lTermAParExamCmdCxx

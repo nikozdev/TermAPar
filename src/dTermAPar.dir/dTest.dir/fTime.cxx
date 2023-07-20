@@ -1,7 +1,7 @@
-#ifndef lTermArgsTestTimeCxx
-#define lTermArgsTestTimeCxx
+#ifndef lTermAParTestTimeCxx
+#define lTermAParTestTimeCxx
 // headers
-#include <lTermArgs.hxx>
+#include <dTermAPar.dir/fMain.hxx>
 // datadef
 static constexpr auto cICount = 1'000;
 // actions
@@ -10,7 +10,7 @@ int fTime()
 {
 	for(auto vI = 0; vI < cICount; vI++)
 	{
-		nTermArgs::tArgParser vArgParser;
+		nTermAPar::tArgParser vArgParser;
 		for(auto vI = 0; vI < cICount; vI++)
 		{
 			vArgParser.fSetOpt("o opt option", "v");
@@ -23,4 +23,4 @@ int main(int vArgC, char **vArgV)
 {
 	return fTime();
 } // main
-#endif // lTermArgsTestTimeCxx
+#endif // lTermAParTestTimeCxx

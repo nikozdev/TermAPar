@@ -4,9 +4,10 @@ include(CheckCXXSourceCompiles)
 include(cmake/mHelpRegex.cmake)
 include(cmake/mHelpOpt.cmake)
 # proj
-project(TermArgs
-    VERSION 3.1.1
-    DESCRIPTION "cli argument parsing single-header-only-library for cxx"
+project(TermAPar
+    VERSION 4.0.0
+    DESCRIPTION
+    "single-header-only-library for cli argument parsing in cxx"
     ) # project
 enable_language(CXX)
 set(vProjName ${PROJECT_NAME})
@@ -19,9 +20,10 @@ set(CMAKE_CXX_STANDARD ${vLangVnum})
 set(CMAKE_CXX_STANDARD_REQUIRED ${vLangVnum})
 # file
 set(vFileDirLoc ${PROJECT_SOURCE_DIR}/..)
-set(vFileDirSrc ${vFileDirLoc}/src)
-set(vFileDirSrcTest ${vFileDirLoc}/src/d${vProjName}Test)
-set(vFileDirSrcExam ${vFileDirLoc}/src/d${vProjName}Exam)
+set(vFileDirSrcRoot ${vFileDirLoc}/src)
+set(vFileDirSrcMain ${vFileDirSrcRoot}/d${vProjName}.dir)
+set(vFileDirSrcTest ${vFileDirSrcMain}/dTest.dir)
+set(vFileDirSrcExam ${vFileDirSrcMain}/dExam.dir)
 set(vFileDirGen ${vFileDirLoc}/gen)
 # make
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -64,12 +66,12 @@ else(oLibsPickFormat)
     message(WARNING "library pick for format is not handled")
 endif(NOT oLibsPickFormat IN_LIST vLibsListFormat)
 target_compile_definitions(${vProjNameL} INTERFACE ${vDefnList})
-target_include_directories(${vProjNameL} INTERFACE ${vFileDirSrc})
+target_include_directories(${vProjNameL} INTERFACE ${vFileDirSrcRoot})
 ##test
 enable_testing()
 option(oMakeTestUnit "make test-unit target" 0)
 if(oMakeTestUnit)
-    add_executable(eTestUnit ${vFileDirSrcTest}/eUnit.cxx)
+    add_executable(eTestUnit ${vFileDirSrcTest}/fUnit.cxx)
     add_test(NAME tUnit
         COMMAND ${vFileDirGen}/eTestUnit
         ) # add_test
@@ -82,7 +84,7 @@ if(oMakeTestUnit)
 endif(oMakeTestUnit)
 option(oMakeTestTime "make test-time target" 0)
 if(oMakeTestTime)
-    add_executable(eTestTime ${vFileDirSrcTest}/eTime.cxx)
+    add_executable(eTestTime ${vFileDirSrcTest}/fTime.cxx)
     add_test(NAME tTime
         COMMAND ${vFileDirGen}/eTestTime
         ) # add_test
@@ -94,7 +96,7 @@ endif(oMakeTestTime)
 ##exam
 option(oMakeExamArg "make example-argument target" 0)
 if(oMakeExamArg)
-    add_executable(eExamArg ${vFileDirSrcExam}/eArg.cxx)
+    add_executable(eExamArg ${vFileDirSrcExam}/fArg.cxx)
     target_link_libraries(eExamArg PRIVATE ${vProjNameL})
     add_test(NAME tExamArg
         COMMAND ${vFileDirGen}/eExamArg a1 -- a2
@@ -107,7 +109,7 @@ if(oMakeExamArg)
 endif(oMakeExamArg)
 option(oMakeExamOpt "make example-option target" 0)
 if(oMakeExamOpt)
-    add_executable(eExamOpt ${vFileDirSrcExam}/eOpt.cxx)
+    add_executable(eExamOpt ${vFileDirSrcExam}/fOpt.cxx)
     target_link_libraries(eExamOpt PRIVATE ${vProjNameL})
     add_test(NAME tExamOpt
         COMMAND ${vFileDirGen}/eExamOpt -o=1 a1 -- a2 -- -o=2
@@ -120,7 +122,7 @@ if(oMakeExamOpt)
 endif(oMakeExamOpt)
 option(oMakeExamCmd "make example-command target" 0)
 if(oMakeExamCmd)
-    add_executable(eExamCmd ${vFileDirSrcExam}/eCmd.cxx)
+    add_executable(eExamCmd ${vFileDirSrcExam}/fCmd.cxx)
     target_link_libraries(eExamCmd PRIVATE ${vProjNameL})
     add_test(NAME tExamCmd
         COMMAND ${vFileDirGen}/eExamCmd cmd -o=1 a1 -- a2 -- -o=2

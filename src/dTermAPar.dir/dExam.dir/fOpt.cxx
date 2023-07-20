@@ -1,9 +1,9 @@
-#ifndef lTermArgsExamOptCxx
-#define lTermArgsExamOptCxx
+#ifndef lTermAParExamOptCxx
+#define lTermAParExamOptCxx
 // headers
-#include <lTermArgs.hxx>
+#include <dTermAPar.dir/fMain.hxx>
 // datadef
-static constexpr auto vHelpText = dTermArgsProjName R"(
+static constexpr auto vHelpText = dTermAParProjName R"(
 - i am an argument and option parser
 > reading arguments
 > reading options
@@ -23,11 +23,11 @@ static constexpr auto vHelpText = dTermArgsProjName R"(
 // actions
 int main(int vArgC, char **vArgV)
 {
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	vArgParser.fSetHelpText(vHelpText);
 	vArgParser.fSetOpt("opt o", "val");
 	vArgParser.fParse(vArgC, vArgV);
-	nTermArgs::nFormat::println("[0]={1}=[0]", "ArgParser", vArgParser);
+	nTermAPar::nFormat::println("[0]={1}=[0]", "ArgParser", vArgParser);
 	return 0;
 } // main
-#endif // lTermArgsExamOptCxx
+#endif // lTermAParExamOptCxx
