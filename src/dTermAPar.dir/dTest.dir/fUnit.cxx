@@ -1,8 +1,8 @@
-#ifndef lTermArgsTestUnitCxx
-#define lTermArgsTestUnitCxx
+#ifndef lTermAParTestUnitCxx
+#define lTermAParTestUnitCxx
 // headers
 #include <cassert>
-#include <lTermArgs.hxx>
+#include <dTermAPar.dir/fMain.hxx>
 // defines
 #define dPrintPrefix()                                         \
 	({                                                         \
@@ -36,7 +36,7 @@ static int	vOffsetNum = 0;
 void fTestArgArr()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({ vArgParser.fParse({"abc", "def"}); });
 	dPrintAssert(vArgParser.fVetArgArr(2));
 	dPrintAssert(vArgParser.fVetArgVal("abc"));
@@ -53,7 +53,7 @@ void fTestArg()
 void fTestOptNotFound()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({
 		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"abc", "def"});
@@ -65,7 +65,7 @@ void fTestOptNotFound()
 void fTestOptL()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({
 		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"--foo", "bar"});
@@ -77,7 +77,7 @@ void fTestOptL()
 void fTestOptS()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({
 		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"-f", "bar"});
@@ -89,7 +89,7 @@ void fTestOptS()
 void fTestOptCondense()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({
 		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"-ff", "bar", "baz"});
@@ -101,7 +101,7 @@ void fTestOptCondense()
 void fTestOptMultiple()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({
 		vArgParser.fSetOpt("foo f", "val");
 		vArgParser.fParse({"-ff", "bar", "baz", "--foo", "bam"});
@@ -113,7 +113,7 @@ void fTestOptMultiple()
 void fTestOptParseSwitch()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	dPrintBlock({ vArgParser.fParse({"foo", "--", "--bar", "--baz"}); });
 	dPrintAssert(vArgParser.fVetArgArr(3));
 	dPrintSuffix();
@@ -133,7 +133,7 @@ void fTestOpt()
 void fTestCmd()
 {
 	dPrintPrefix();
-	nTermArgs::tArgParser vArgParser;
+	nTermAPar::tArgParser vArgParser;
 	auto				  pArgParserCmd = vArgParser.fSetCmd("boo");
 	dPrintBlock({
 		pArgParserCmd->fSetOpt("foo", "val");
@@ -161,4 +161,4 @@ int main()
 {
 	return fTest();
 } // main
-#endif // lTermArgsTestUnitCxx
+#endif // lTermAParTestUnitCxx

@@ -1,5 +1,5 @@
-#ifndef dTermArgsHxx
-#define dTermArgsHxx
+#ifndef dTermAParMainHxx
+#define dTermAParMainHxx
 
 #include <algorithm>
 #include <cctype>
@@ -14,23 +14,23 @@
 
 #include <functional>
 
-#ifdef dTermArgsLibsPickFormatFmt
+#ifdef dTermAParLibsPickFormatFmt
 #	include "fmt/format.h"
 #	include "fmt/ranges.h"
-namespace nTermArgs
+namespace nTermAPar
 {
 namespace nFormat = ::fmt;
-} // namespace nTermArgs
-#endif // dTermArgsLibsPickFormatFmt
-#ifdef dTermArgsLibsPickFormatStd
+} // namespace nTermAPar
+#endif // dTermAParLibsPickFormatFmt
+#ifdef dTermAParLibsPickFormatStd
 #	include <format>
-namespace nTermArgs
+namespace nTermAPar
 {
 namespace nFormat = std;
-} // namespace nTermArgs
-#endif // dTermArgsLibsPickFormatStd
+} // namespace nTermAPar
+#endif // dTermAParLibsPickFormatStd
 
-namespace nTermArgs
+namespace nTermAPar
 {
 
 // operats
@@ -568,15 +568,15 @@ private: // datadef
 using tOptPtr = tCmd::tOptPtr;
 using tCmdPtr = tCmd::tCmdPtr;
 
-} // namespace nTermArgs
+} // namespace nTermAPar
 
 // typedef
 template<>
-class ::nTermArgs::nFormat::formatter<::nTermArgs::tCmd>
+class ::nTermAPar::nFormat::formatter<::nTermAPar::tCmd>
 {
 public: // typedef
 
-	using tVal = ::nTermArgs::tCmd;
+	using tVal = ::nTermAPar::tCmd;
 
 public: // actions
 
@@ -591,7 +591,7 @@ public: // actions
 	template<typename tCtx>
 	constexpr auto format(const tVal &rVal, tCtx &rCtx) const
 	{
-		using namespace nTermArgs;
+		using namespace nTermAPar;
 		nFormat::format_to(rCtx.out(), "(");
 		nFormat::format_to(rCtx.out(), "[{0}]=(", "ArgArr");
 		for(auto vI = 0; vI < rVal.vArgArr.size(); vI++)
@@ -627,4 +627,4 @@ private: // datadef
 	bool _;
 }; // tCmd formatter
 
-#endif // dTermArgsHxx
+#endif // dTermAParMainHxx
