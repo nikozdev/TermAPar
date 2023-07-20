@@ -28,17 +28,17 @@ static constexpr auto vHelpTextCmd = dTermArgsProjName R"(
 > whatever else you can imagine
 )"; // HelpTextCmd
 // actions
-static void fCallback(nTermArgs::tCmd &rCmd)
+static bool fCmdFun(nTermArgs::tCmd &rCmd)
 {
 	nTermArgs::nFormat::println("[0]={1}=[0]", "Cmd", rCmd);
+	return 1;
 }
 int main(int vArgC, char **vArgV)
 {
 	nTermArgs::tArgParser vArgParser;
 	vArgParser.fSetHelpText(vHelpText);
-	nTermArgs::tCmdPtr pArgParserCmd = vArgParser.fSetCmd("c cmd");
+	nTermArgs::tCmdPtr pArgParserCmd = vArgParser.fSetCmd("c cmd", fCmdFun);
 	pArgParserCmd->fSetHelpText(vHelpTextCmd);
-	pArgParserCmd->fSetCallback(fCallback);
 	pArgParserCmd->fSetOpt("o opt", "val");
 	vArgParser.fParse(vArgC, vArgV);
 	nTermArgs::nFormat::println("[0]={1}=[0]", "ArgParser", vArgParser);
