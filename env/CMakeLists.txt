@@ -11,7 +11,8 @@ project(TermAPar
     ) # project
 enable_language(CXX)
 set(vProjName ${PROJECT_NAME})
-set(vProjNameL "l${vProjName}") # library target
+set(vProjNameLib "l${vProjName}") # library target
+set(vProjNameExe "e${vProjName}") # executable target
 set(vProjVnum ${PROJECT_VERSION})
 set(vProjDesc ${PROJECT_DESCRIPTION})
 # lang
@@ -19,32 +20,37 @@ set(vLangVnum 23)
 set(CMAKE_CXX_STANDARD ${vLangVnum})
 set(CMAKE_CXX_STANDARD_REQUIRED ${vLangVnum})
 # file
-set(vFileDirLoc ${PROJECT_SOURCE_DIR}/..)
-set(vFileDirSrcRoot ${vFileDirLoc}/src)
-set(vFileDirSrcMain ${vFileDirSrcRoot}/d${vProjName}.dir)
-set(vFileDirSrcTest ${vFileDirSrcMain}/dTest.dir)
-set(vFileDirSrcExam ${vFileDirSrcMain}/dExam.dir)
-set(vFileDirGen ${vFileDirLoc}/gen)
+set(vFdirLoc ${PROJECT_SOURCE_DIR}/..)
+set(vFdirSrcRoot ${vFdirLoc}/src)
+set(vFdirSrcBase ${vFdirSrcRoot}/d${vProjName}.dir)
+set(vFdirGen ${vFdirLoc}/gen)
 # make
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_library(${vProjNameL} INTERFACE)
-set(vDefnList
+option(oMakeProjExe "make project executable" 1)
+option(oTestProjExe "test project executable" 1)
+## lib
+add_library(${vProjNameLib} INTERFACE)
+set(vProjDefsLib
     "$<$<CXX_COMPILER_ID:MSVC>:>"
     "$<$<CXX_COMPILER_ID:GNU,Clang>:>"
     "d${vProjName}ProjName=\"${vProjName}\""
+    "d${vProjName}ProjNameLib=\"${vProjNameLib}\""
+    "d${vProjName}ProjNameExe=\"${vProjNameExe}\""
     "d${vProjName}ProjVnum=\"${vProjVnum}\""
     "d${vProjName}ProjDesc=\"${vProjDesc}\""
-    ) # vDefnList
-##libs
+    "d${vProjName}MakeProjExe=${oMakeProjExe}"
+    "d${vProjName}TestProjExe=${oTestProjExe}"
+    ) # vProjDefsLib
+### libs
 set(oLibsPickFormat "fmt")
-set(vLibsListFormat "std;fmt")
+set(vLibsListFormat "std;fmt;")
 fOptEnum(oLibsPickFormat vLibsListFormat  "library pick for formatting")
 if(NOT oLibsPickFormat IN_LIST vLibsListFormat)
     message(WARNING "library pick for format is not defined")
 elseif(oLibsPickFormat STREQUAL "fmt")
     find_package(fmt CONFIG REQUIRED)
-    target_link_libraries(${vProjNameL} INTERFACE fmt::fmt)
-    list(APPEND vDefnList "d${vProjName}LibsPickFormatFmt")
+    target_link_libraries(${vProjNameLib} INTERFACE fmt::fmt)
+    list(APPEND vProjDefsLib "d${vProjName}LibsPickFormatFmt")
 elseif(oLibsPickFormat STREQUAL "std")
     if(${oLibsPickFormatStdCompiles})
     else()
@@ -54,7 +60,7 @@ elseif(oLibsPickFormat STREQUAL "std")
             oLibsPickFormatStdCompiles
             ) # check_cxx_source_compiles
         if(${oLibsPickFormatStdCompiles})
-            list(APPEND vDefnList "d${vProjName}LibsPickFormatStd")
+            list(APPEND vProjDefsLib "d${vProjName}LibsPickFormatStd")
         else()
             message(WARNING
                 "std::format does not compile"
@@ -65,71 +71,34 @@ elseif(oLibsPickFormat STREQUAL "std")
 else(oLibsPickFormat)
     message(WARNING "library pick for format is not handled")
 endif(NOT oLibsPickFormat IN_LIST vLibsListFormat)
-target_compile_definitions(${vProjNameL} INTERFACE ${vDefnList})
-target_include_directories(${vProjNameL} INTERFACE ${vFileDirSrcRoot})
-##test
-enable_testing()
-option(oMakeTestUnit "make test-unit target" 0)
-if(oMakeTestUnit)
-    add_executable(eTestUnit ${vFileDirSrcTest}/fUnit.cxx)
-    add_test(NAME tUnit
-        COMMAND ${vFileDirGen}/eTestUnit
-        ) # add_test
-    set(vPassRegex ".*)=[fTest]")
-    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
-    set_tests_properties(tUnit PROPERTIES
-        PASS_REGULAR_EXPRESSION ${vPassRegex}
-        ) # set_tests_properties
-    target_link_libraries(eTestUnit PRIVATE ${vProjNameL})
-endif(oMakeTestUnit)
-option(oMakeTestTime "make test-time target" 0)
-if(oMakeTestTime)
-    add_executable(eTestTime ${vFileDirSrcTest}/fTime.cxx)
-    add_test(NAME tTime
-        COMMAND ${vFileDirGen}/eTestTime
-        ) # add_test
-    set_tests_properties(tTime PROPERTIES
-        TIMEOUT 16
-        ) # set_tests_properties
-    target_link_libraries(eTestTime PRIVATE ${vProjNameL})
-endif(oMakeTestTime)
-##exam
-option(oMakeExamArg "make example-argument target" 0)
-if(oMakeExamArg)
-    add_executable(eExamArg ${vFileDirSrcExam}/fArg.cxx)
-    target_link_libraries(eExamArg PRIVATE ${vProjNameL})
-    add_test(NAME tExamArg
-        COMMAND ${vFileDirGen}/eExamArg a1 -- a2
-        ) # add_test
-    set(vPassRegex "[ArgArr]=(.*[0]=(a1).*[1]=(a2).*)=[ArgArr]")
-    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
-    set_tests_properties(tExamArg PROPERTIES
-        PASS_REGULAR_EXPRESSION ${vPassRegex}
-        ) # set_tests_properties
-endif(oMakeExamArg)
-option(oMakeExamOpt "make example-option target" 0)
-if(oMakeExamOpt)
-    add_executable(eExamOpt ${vFileDirSrcExam}/fOpt.cxx)
-    target_link_libraries(eExamOpt PRIVATE ${vProjNameL})
-    add_test(NAME tExamOpt
-        COMMAND ${vFileDirGen}/eExamOpt -o=1 a1 -- a2 -- -o=2
-        ) # add_test
-    set(vPassRegex ".*[OptTab]=(.*[o]=(2).*[opt]=(2).*)=[OptTab]")
-    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
-    set_tests_properties(tExamOpt PROPERTIES
-        PASS_REGULAR_EXPRESSION ${vPassRegex}
-        ) # set_tests_properties
-endif(oMakeExamOpt)
-option(oMakeExamCmd "make example-command target" 0)
-if(oMakeExamCmd)
-    add_executable(eExamCmd ${vFileDirSrcExam}/fCmd.cxx)
-    target_link_libraries(eExamCmd PRIVATE ${vProjNameL})
-    add_test(NAME tExamCmd
-        COMMAND ${vFileDirGen}/eExamCmd cmd -o=1 a1 -- a2 -- -o=2
-        ) # add_test
-    set(vPassRegex ".*[CmdTab]=(.*[c]=(.*)=[c].*[cmd]=(.*)=[cmd].*)=[CmdTab]")
-    fRegexIgnoreABracket(vPassRegex ${vPassRegex})
-    set_tests_properties(tExamCmd PROPERTIES
-        PASS_REGULAR_EXPRESSION ${vPassRegex}
-        ) # set_tests_properties
-endif(oMakeExamCmd)
+### last
+target_compile_definitions(${vProjNameLib} INTERFACE ${vProjDefsLib})
+target_include_directories(${vProjNameLib} INTERFACE ${vFdirSrcRoot})
+## exe
+if(oMakeProjExe)
+    add_executable(${vProjNameExe} ${vFdirSrcBase}/fMain.cxx)
+    # test
+    if(oTestProjExe)
+        enable_testing()
+        #
+        add_test(NAME tUnit
+            COMMAND
+            ${vFdirGen}/${vProjNameExe} TestUnit
+            ) # add_test
+        set(vPassRegex ".*)=[fTestUnit]")
+        fRegexIgnoreABracket(vPassRegex)
+        set_tests_properties(tUnit PROPERTIES
+            PASS_REGULAR_EXPRESSION ${vPassRegex}
+            ) # set_tests_properties
+        #
+        add_test(NAME tTime
+            COMMAND
+            ${vFdirGen}/${vProjNameExe} TestTime
+            ) # add_test
+        set_tests_properties(tTime PROPERTIES
+            TIMEOUT 16
+            ) # set_tests_properties
+    endif(oTestProjExe)
+    # libs
+    target_link_libraries(${vProjNameExe} PRIVATE ${vProjNameLib})
+endif(oMakeProjExe)
