@@ -126,6 +126,11 @@ public: // codetor
 
 public: // getters
 
+	[[nodiscard("get the help message")]]
+	auto fGetHelpText() const
+	{
+		return this->vHelpText;
+	} // fGetHelpText
 	[[nodiscard("get command key detected by argument parsing")]]
 	auto fGetCmdKey() const
 	{
@@ -176,6 +181,11 @@ public: // vetters
 	{
 		return (this->vCmdTab.find(vKey) != this->vCmdTab.end()) == vVet;
 	} // fVetCmdKey
+	[[nodiscard("command was passed as an argument")]]
+	bool fVetCmdKey(bool vVet = 1) const
+	{
+		return this->fVetCmdKey(this->fGetCmdKey(), vVet);
+	} // fVetCmdKey
 	[[nodiscard("option table is not empty")]]
 	bool fVetOptTab(bool vVet = 1) const
 	{
@@ -220,15 +230,15 @@ public: // setters
 		this->vHelpText = vHelpText;
 		return *this;
 	} // fSetHelpText
-	auto fSetCmdAct(const tCmdAct &rCmdAct)
+	auto fSetCmdAct(const tCmdAct &fCmdAct)
 	{
-		this->vCmdAct = rCmdAct;
+		this->fCmdAct = fCmdAct;
 		return *this;
 	} // fSetCmdAct
-	auto fSetCmd(tCmdKey vKey, const tCmdAct &vCmdAct = fCmdFun)
+	auto fSetCmd(tCmdKey vKey, const tCmdAct &fCmdAct = fCmdFun)
 	{
 		tCmdPtr pCmd = std::make_shared<tCmd>();
-		pCmd->fSetCmdAct(vCmdAct);
+		pCmd->fSetCmdAct(fCmdAct);
 		tKey::size_type vPosWas = 0, vPosNow = 0;
 		while(vPosNow != std::string::npos)
 		{
@@ -402,7 +412,10 @@ private: // actions
 					{
 						return fParseAll(rArgStream);
 					}
-					this->vArgArr.push_back(vArg);
+					else
+					{
+						this->vArgArr.push_back(vArg);
+					}
 				}
 				continue;
 			} // not options, not command - write to the argument array
@@ -411,7 +424,7 @@ private: // actions
 				this->fParseOptL(vArg.substr(2), rArgStream);
 				continue;
 			} // option in a long format
-			else if(vArg.compare(0, 1, "-") == 0)
+			else if(vArg[0] == '-')
 			{
 				if(vArg.size() == 1 || std::isdigit(vArg[1]))
 				{
@@ -469,7 +482,7 @@ private: // actions
 			this->vArgArr.push_back(vArg);
 			vArgIs1st = 0;
 		} // parse all arguments from the stream one by one
-		return this->vCmdAct ? this->vCmdAct(*this) : 1;
+		return this->fCmdAct ? this->fCmdAct(*this) : 1;
 	} // fParseAll
 	[[maybe_unused]]
 	bool fReset()
@@ -505,24 +518,19 @@ public: // actions
 			if(this->fReset() == 0)
 			{
 				nFormat::println(stderr, "failed reset before parsing");
-				return this->fReset();
+				return 0;
 			}
 		}
 		else
 		{
 			this->vParsed = 1;
 		}
-		if(vArgC <= 1)
-		{
-			return 1;
-		}
 		tArgStream vArgStream;
 		for(int vIter = 1; vIter < vArgC; vIter++)
 		{
 			vArgStream.fAdd(vArgV[vIter]);
 		}
-		this->fParseAll(vArgStream);
-		return 1;
+		return this->fParseAll(vArgStream);
 	} // fParse
 	[[maybe_unused]]
 	bool fParse(const int vArgC, const char **vArgV)
@@ -549,14 +557,19 @@ public: // actions
 		{
 			vArgStream.fAdd(rArg);
 		}
-		this->fParseAll(vArgStream);
-		return 1;
+		return this->fParseAll(vArgStream);
 	} // fParse
+	[[maybe_unused]]
+	auto fPrintHelp()
+	{
+		nFormat::println(stdout, "{0}", this->vHelpText);
+		return 1;
+	} // fPrintHelp
 
 private: // datadef
 
 	tStr	vHelpText; // for "help" command or "--help|-h" option
-	tCmdAct vCmdAct;   // command action or a function to call after parsing
+	tCmdAct fCmdAct;   // command action or a function to call after parsing
 	tCmdKey vCmdKey;   // command pointer taken from the parsed arguments
 	tCmdPtr vCmdPtr;   // command key taken from the parsed arguments
 	tCmdTab vCmdTab;   // command registry
