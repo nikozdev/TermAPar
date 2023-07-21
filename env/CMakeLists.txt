@@ -5,7 +5,7 @@ include(cmake/mHelpRegex.cmake)
 include(cmake/mHelpOpt.cmake)
 # proj
 project(TermAPar
-    VERSION 4.0.0
+    VERSION 4.1.0
     DESCRIPTION
     "single-header-only-library for cli argument parsing in cxx"
     ) # project
