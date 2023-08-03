@@ -2,7 +2,7 @@
 #define dTermAParMainCxx
 // headers
 #include <cassert>
-#include <dTermAPar.dir/fMain.hxx>
+#include <dTermAPar.dir/fHead.hxx>
 // defines
 using namespace nTermAPar;
 using namespace nFormat;
