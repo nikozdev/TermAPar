@@ -1,6 +1,0 @@
-* [Home](@root/)
-* [Quickstart](@root/quickstart//)
-* [CLI](@root/cli//)
-* [API](@root/api//)
-* [License](@root/license//)
-* [Github](https://github.com/dmulholl/argspp)
