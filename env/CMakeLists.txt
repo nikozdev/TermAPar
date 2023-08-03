@@ -6,7 +6,7 @@ include(dCmake.dir/dHelp.dir/fOpt.cmake)
 include(dCmake.dir/dHelp.dir/fPack.cmake)
 # proj
 project(TermAPar
-  VERSION 4.1.0
+  VERSION 4.2.0
   DESCRIPTION
   "single-header-only-library for cli argument parsing in cxx"
   ) # project
