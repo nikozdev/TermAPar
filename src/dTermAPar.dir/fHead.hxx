@@ -1,39 +1,38 @@
-#ifndef dTermAParMainHxx
-#define dTermAParMainHxx
+#ifndef dTermAParHeadHxx
+#define dTermAParHeadHxx
 
 #include <algorithm>
 #include <cctype>
 
-#include <map>
-#include <vector>
 #include <deque>
+#include <map>
 #include <memory>
+#include <vector>
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include <functional>
 
 #ifdef dTermAParLibsPickFormatFmt
-#	include "fmt/format.h"
-#	include "fmt/ranges.h"
+#include "fmt/format.h"
 namespace nTermAPar
 {
 namespace nFormat = ::fmt;
-} // namespace nTermAPar
-#endif // dTermAParLibsPickFormatFmt
+}//namespace nTermAPar
+#endif//dTermAParLibsPickFormatFmt
 #ifdef dTermAParLibsPickFormatStd
-#	include <format>
+#include <format>
 namespace nTermAPar
 {
 namespace nFormat = std;
-} // namespace nTermAPar
-#endif // dTermAParLibsPickFormatStd
+}//namespace nTermAPar
+#endif//dTermAParLibsPickFormatStd
 
 namespace nTermAPar
 {
 
-// operats
+//operats
 
 template<typename t>
 std::ostream &operator<<(std::ostream &vStream, const std::vector<t> &vVector)
@@ -49,9 +48,9 @@ std::ostream &operator<<(std::ostream &vStream, const std::vector<t> &vVector)
 	}
 	vStream << "]";
 	return vStream;
-} // operator<<(...tVector)
+}//operator<<(...tVector)
 
-// typedef
+//typedef
 
 using tSize = size_t;
 
@@ -69,7 +68,7 @@ using tArgArr = std::vector<tArg>;
 
 typedef struct tArgStream
 {
-public: // codetor
+public://codetor
 
 	tArgStream() = default;
 	template<typename... tArgPack>
@@ -77,36 +76,36 @@ public: // codetor
 	{
 	}
 
-public: // setters
+public://setters
 
 	void fAdd(const tArg &vArg)
 	{
 		this->vArgQueue.push_back(vArg);
-	} // fAdd
+	}//fAdd
 
-public: // getters
+public://getters
 
 	tArg fPop()
 	{
 		tArg vArg = this->vArgQueue.front();
 		this->vArgQueue.pop_front();
 		return vArg;
-	} // fPop
+	}//fPop
 
-public: // vetters
+public://vetters
 
 	bool fVet()
 	{
 		return this->vArgQueue.size();
-	} // fVet
+	}//fVet
 
-private: // datadef
+private://datadef
 
 	std::deque<tArg> vArgQueue;
-} tArgStream; // argument stream type
+} tArgStream;//argument stream type
 typedef class tCmd
 {
-public: // typedef
+public://typedef
 
 	using tCmdFun = bool(tCmd &rCmd);
 	using tCmdAct = std::function<tCmdFun>;
@@ -116,7 +115,7 @@ public: // typedef
 	using tOptTab = std::map<tKey, tOptPtr>;
 	friend class nFormat::formatter<tCmd>;
 
-public: // codetor
+public://codetor
 
 	tCmd(): vHelpText{""}, vParsed{0} {};
 	tCmd(const tCmd &copy) = default;
@@ -124,96 +123,96 @@ public: // codetor
 
 	~tCmd() = default;
 
-public: // getters
+public://getters
 
 	[[nodiscard("get the help message")]]
 	auto fGetHelpText() const
 	{
 		return this->vHelpText;
-	} // fGetHelpText
+	}//fGetHelpText
 	[[nodiscard("get command key detected by argument parsing")]]
 	auto fGetCmdKey() const
 	{
 		return this->vCmdKey;
-	} // fGetCmdKey
+	}//fGetCmdKey
 	[[nodiscard("get command pointer detected by argument parsing")]]
 	auto fGetCmdPtr() const
 	{
 		return this->vCmdPtr;
-	} // fGetCmdPtr
+	}//fGetCmdPtr
 	[[nodiscard("get command pointer by key")]]
 	auto fGetCmdPtr(const tKey vKey) const
 	{
 		auto rI = this->vCmdTab.find(vKey);
 		return (rI == this->vCmdTab.end()) ? rI->second : tCmdPtr{};
-	} // fGetCmdPtr
+	}//fGetCmdPtr
 	[[nodiscard("get option pointer by key")]]
 	auto fGetOptPtr(const tOptKey vKey) const
 	{
 		auto rI = this->vOptTab.find(vKey);
 		return (rI == this->vOptTab.end()) ? rI->second : tOptPtr{};
-	} // fGetOptPtr
+	}//fGetOptPtr
 	[[nodiscard("get option value by key")]]
 	auto fGetOptVal(const tOptKey vKey) const
 	{
 		return this->fVetOptKey(vKey) ? *this->vOptTab.find(vKey)->second : tOpt{};
-	} // fGetOptVal
+	}//fGetOptVal
 	[[nodiscard("get argument value by key")]]
 	auto fGetArgVal(const tArgKey vKey) const
 	{
 		return this->vArgArr[vKey];
-	} // fGetArgVal
+	}//fGetArgVal
 	[[nodiscard("get argument array reference")]]
 	auto fGetArgArr() const
 	{
 		return this->vArgArr;
-	} // fGetArgArr
+	}//fGetArgArr
 
-public: // vetters
+public://vetters
 
 	[[nodiscard("command table is not empty")]]
 	bool fVetCmdTab(bool vVet = 1) const
 	{
 		return this->vCmdTab.empty() != vVet;
-	} // fVetCmdTab
+	}//fVetCmdTab
 	[[nodiscard("command table contains the given key")]]
 	bool fVetCmdKey(tCmdKey vKey, bool vVet = 1) const
 	{
 		return (this->vCmdTab.find(vKey) != this->vCmdTab.end()) == vVet;
-	} // fVetCmdKey
+	}//fVetCmdKey
 	[[nodiscard("command was passed as an argument")]]
 	bool fVetCmdKey(bool vVet = 1) const
 	{
 		return this->fVetCmdKey(this->fGetCmdKey(), vVet);
-	} // fVetCmdKey
+	}//fVetCmdKey
 	[[nodiscard("option table is not empty")]]
 	bool fVetOptTab(bool vVet = 1) const
 	{
 		return this->vOptTab.empty() != vVet;
-	} // fVetOptTab
+	}//fVetOptTab
 	[[nodiscard("option table contains the given key")]]
 	bool fVetOptKey(tOptKey vKey, bool vVet = 1) const
 	{
 		return (this->vOptTab.find(vKey) != this->vOptTab.end()) == vVet;
-	} // fVetOptKey
+	}//fVetOptKey
 	[[nodiscard("option table finds the given value by the given key")]]
 	bool fVetOptVal(tOptKey vKey, tOptVal vOpt, bool vVet = 1) const
 	{
 		auto  rI   = this->vOptTab.find(vKey);
 		auto &rPtr = (rI->second);
 		return (rI == this->vOptTab.end() ? 0 : (*rPtr == vOpt)) == vVet;
-	} // fVetOptVal
+	}//fVetOptVal
 	[[nodiscard("argument array has contains given count of arguments")]]
 	bool fVetArgArr(tSize vSize = 1, bool vVet = 1) const
 	{
 		return (this->vArgArr.size() >= vSize) == vVet;
-	} // fVetArgArrCount
+	}//fVetArgArrCount
 	[[nodiscard("argument array contains the given argument value")]]
 	bool fVetArgVal(tArg vArg) const
 	{
 		return std::find(this->vArgArr.begin(), this->vArgArr.end(), vArg)
 			!= this->vArgArr.end();
-	} // fVetArgVal
+	}//fVetArgVal
 	[[nodiscard(
 		"arguments were successfully parsed"
 		"no reset calls were since then"
@@ -221,20 +220,20 @@ public: // vetters
 	bool fVetParsed() const
 	{
 		return this->vParsed;
-	} // fVetParsed
+	}//fVetParsed
 
-public: // setters
+public://setters
 
 	auto fSetHelpText(tStr vHelpText)
 	{
 		this->vHelpText = vHelpText;
 		return *this;
-	} // fSetHelpText
+	}//fSetHelpText
 	auto fSetCmdAct(const tCmdAct &fCmdAct)
 	{
 		this->fCmdAct = fCmdAct;
 		return *this;
-	} // fSetCmdAct
+	}//fSetCmdAct
 	auto fSetCmd(tCmdKey vKey, const tCmdAct &fCmdAct = fCmdFun)
 	{
 		tCmdPtr pCmd = std::make_shared<tCmd>();
@@ -248,7 +247,7 @@ public: // setters
 			vPosWas		  = vPosNow + 1;
 		}
 		return pCmd;
-	} // fSetCmd
+	}//fSetCmd
 	auto fSetOpt(tOptKey vKey, tOptVal vVal = "")
 	{
 		tOptPtr			pOpt	= std::make_shared<tOpt>(vVal);
@@ -261,16 +260,16 @@ public: // setters
 			vPosWas		  = vPosNow + 1;
 		}
 		return pOpt;
-	} // fSetOpt
+	}//fSetOpt
 
-private: // actions
+private://actions
 
 	[[maybe_unused]]
 	auto fExitHelp(int vCode = 0)
 	{
 		nFormat::println(stdout, "{0}", this->vHelpText);
 		return exit(vCode);
-	} // fExitHelp
+	}//fExitHelp
 	[[maybe_unused]]
 	bool fParseOptE(const tArg &rPfx, const tKey &vKey, const tArg &rArg)
 	{
@@ -288,16 +287,16 @@ private: // actions
 			{
 				*this->vOptTab[vKey] = rArg;
 			}
-		} // found option
+		}//found option
 		else
 		{
 			nFormat::
 				println(stderr, "[{0}{1}] option is not defined", rPfx, vKey);
 			this->fExitHelp(1);
 			return this->fReset();
-		} // not an option
+		}//not an option
 		return 1;
-	} // fParseOptE
+	}//fParseOptE
 	[[maybe_unused]]
 	bool fParseOptL(const tArg &rArg, tArgStream &rArgStream)
 	{
@@ -306,7 +305,7 @@ private: // actions
 			tKey vKey = rArg.substr(0, vPos);
 			tArg vArg = rArg.substr(vPos + 1);
 			return this->fParseOptE("--", vKey, vArg);
-		} // --opt=val
+		}//--opt=val
 		else if(this->fVetOptKey(rArg))
 		{
 			if(rArgStream.fVet())
@@ -320,12 +319,12 @@ private: // actions
 				this->fExitHelp(1);
 				return this->fReset();
 			}
-		} // found option
+		}//found option
 		else if(rArg == "help" && this->vHelpText != "")
 		{
 			this->fExitHelp(0);
 			return 1;
-		} // no option found - try the default help option
+		}//no option found - try the default help option
 		else
 		{
 			nFormat::println(
@@ -333,9 +332,9 @@ private: // actions
 			);
 			this->fExitHelp(1);
 			return this->fReset();
-		} // not an option
+		}//not an option
 		return this->fReset();
-	} // fParseOptL
+	}//fParseOptL
 	[[maybe_unused]]
 	bool fParseOptS(const tArg &rArg, tArgStream &rArgStream)
 	{
@@ -344,9 +343,9 @@ private: // actions
 			tKey vKey = rArg.substr(0, vPos);
 			tArg vVal = rArg.substr(vPos + 1);
 			return fParseOptE("-", vKey, vVal);
-		} // -o=v
+		}//-o=v
 		for(auto vI = 0; vI < rArg.length(); vI++)
-		{ // iterate over all short options
+		{//iterate over all short options
 			tKey vKey = rArg.substr(vI, 1);
 			if(this->fVetOptKey(vKey))
 			{
@@ -375,12 +374,12 @@ private: // actions
 					this->fExitHelp(1);
 					return this->fReset();
 				}
-			} // found option
+			}//found option
 			else if(vKey == "h" && this->vHelpText != "")
 			{
 				this->fExitHelp(0);
 				return 1;
-			} // no option found - try default help option
+			}//no option found - try default help option
 			else if(rArg.size() > 1)
 			{
 				nFormat::println(
@@ -393,9 +392,9 @@ private: // actions
 			}
 			this->fExitHelp(1);
 			return this->fReset();
-		} // iterate over all options
+		}//iterate over all options
 		return 1;
-	} // fParseOptS
+	}//fParseOptS
 	[[maybe_unused]]
 	bool fParseAll(tArgStream &rArgStream)
 	{
@@ -418,12 +417,12 @@ private: // actions
 					}
 				}
 				continue;
-			} // not options, not command - write to the argument array
+			}//not options, not command - write to the argument array
 			else if(vArg.compare(0, 2, "--") == 0)
 			{
 				this->fParseOptL(vArg.substr(2), rArgStream);
 				continue;
-			} // option in a long format
+			}//option in a long format
 			else if(vArg[0] == '-')
 			{
 				if(vArg.size() == 1 || std::isdigit(vArg[1]))
@@ -435,13 +434,13 @@ private: // actions
 					this->fParseOptS(vArg.substr(1), rArgStream);
 				}
 				continue;
-			} // option in a short format
+			}//option in a short format
 			else if(vArgIs1st && this->vCmdTab.count(vArg))
 			{
 				tCmdPtr pCmd  = this->vCmdTab[vArg];
 				this->vCmdKey = vArg;
 				pCmd->fParseAll(rArgStream);
-			} // command
+			}//command
 			else if(vArgIs1st && vArg == "help")
 			{
 				if(this->fVetCmdTab())
@@ -453,7 +452,7 @@ private: // actions
 						{
 							this->vCmdTab[vKey]->fExitHelp(0);
 							return 1;
-						} // not a command
+						}//not a command
 						else
 						{
 							nFormat::println(
@@ -463,27 +462,27 @@ private: // actions
 							);
 							this->fExitHelp(1);
 							return this->fReset();
-						} // help for the command
+						}//help for the command
 						return this->fReset();
-					} // help for a command
+					}//help for a command
 					else
 					{
 						this->fExitHelp(0);
 						return 1;
-					} // just write our help
+					}//just write our help
 				}
 				else if(this->vHelpText != "")
 				{
 					this->fExitHelp(0);
 					return 1;
-				} // no option found - try the default help option
+				}//no option found - try the default help option
 				return this->fReset();
-			} // not an option, not a command - try default help
+			}//not an option, not a command - try default help
 			this->vArgArr.push_back(vArg);
 			vArgIs1st = 0;
-		} // parse all arguments from the stream one by one
+		}//parse all arguments from the stream one by one
 		return this->fCmdAct ? this->fCmdAct(*this) : 1;
-	} // fParseAll
+	}//fParseAll
 	[[maybe_unused]]
 	bool fReset()
 	{
@@ -501,14 +500,14 @@ private: // actions
 			nFormat::println(stderr, "cannot reset without parsing");
 		}
 		return this->fVetParsed() == 0;
-	} // fReset
+	}//fReset
 	[[maybe_unused]]
 	inline static constexpr bool fCmdFun(tCmd &rCmd)
 	{
 		return 1;
 	};
 
-public: // actions
+public://actions
 
 	[[maybe_unused]]
 	bool fParse(const int vArgC, char **vArgV)
@@ -531,7 +530,7 @@ public: // actions
 			vArgStream.fAdd(vArgV[vIter]);
 		}
 		return this->fParseAll(vArgStream);
-	} // fParse
+	}//fParse
 	[[maybe_unused]]
 	bool fParse(const int vArgC, const char **vArgV)
 	{
@@ -558,40 +557,40 @@ public: // actions
 			vArgStream.fAdd(rArg);
 		}
 		return this->fParseAll(vArgStream);
-	} // fParse
+	}//fParse
 	[[maybe_unused]]
 	auto fPrintHelp()
 	{
 		nFormat::println(stdout, "{0}", this->vHelpText);
 		return 1;
-	} // fPrintHelp
+	}//fPrintHelp
 
-private: // datadef
+private://datadef
 
-	tStr	vHelpText; // for "help" command or "--help|-h" option
-	tCmdAct fCmdAct;   // command action or a function to call after parsing
-	tCmdKey vCmdKey;   // command pointer taken from the parsed arguments
-	tCmdPtr vCmdPtr;   // command key taken from the parsed arguments
-	tCmdTab vCmdTab;   // command registry
-	tOptTab vOptTab;   // option registry
-	tArgArr vArgArr;   // the rest of the arguments in an array
-	bool	vParsed;   // whether or not we were parsing
+	tStr	vHelpText;//for "help" command or "--help|-h" option
+	tCmdAct fCmdAct;  //command action or a function to call after parsing
+	tCmdKey vCmdKey;  //command pointer taken from the parsed arguments
+	tCmdPtr vCmdPtr;  //command key taken from the parsed arguments
+	tCmdTab vCmdTab;  //command registry
+	tOptTab vOptTab;  //option registry
+	tArgArr vArgArr;  //the rest of the arguments in an array
+	bool	vParsed;  //whether or not we were parsing
 
-} tArgParser, tCmd; // arg parser or the command type
+} tArgParser, tCmd;//arg parser or the command type
 using tOptPtr = tCmd::tOptPtr;
 using tCmdPtr = tCmd::tCmdPtr;
 
-} // namespace nTermAPar
+}//namespace nTermAPar
 
-// typedef
+//typedef
 template<>
 class ::nTermAPar::nFormat::formatter<::nTermAPar::tCmd>
 {
-public: // typedef
+public://typedef
 
 	using tVal = ::nTermAPar::tCmd;
 
-public: // actions
+public://actions
 
 	template<typename tCtx>
 	constexpr auto parse(tCtx &rCtx)
@@ -600,7 +599,7 @@ public: // actions
 		{
 		}
 		return rCtx.end();
-	} // parse
+	}//parse
 	template<typename tCtx>
 	constexpr auto format(const tVal &rVal, tCtx &rCtx) const
 	{
@@ -633,11 +632,11 @@ public: // actions
 		nFormat::
 			format_to(rCtx.out(), "[{0}]=({1})=[{0}]", "CmdKey", rVal.vCmdKey);
 		return nFormat::format_to(rCtx.out(), ")");
-	} // format
+	}//format
 
-private: // datadef
+private://datadef
 
 	bool _;
-}; // tCmd formatter
+};//tCmd formatter
 
-#endif // dTermAParMainHxx
+#endif//dTermAParHeadHxx

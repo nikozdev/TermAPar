@@ -27,7 +27,7 @@ using namespace nFormat;
 		dBlock;                                                       \
 	}) // dPrintBlock
 // content
-#ifdef dTermAParMakeProjExe
+#ifdef dTermAParMakeExe
 // datadef
 static char vOffsetStr[0xff];
 static int	vOffsetNum = 0;
@@ -157,7 +157,7 @@ bool fTestUnit(tCmd &rCmd)
 	dPrintSuffix();
 	return 1;
 } // fTestUnit
-#	endif // dTermAParTestProjExeTestUnit
+#	endif // dTermAParTestExeTestUnit
 #	if 1
 // datadef
 static constexpr auto cTestTimeCount = 1'000;
@@ -188,7 +188,7 @@ bool fTestTime(tCmd &rCmd)
 	}
 	return 1;
 } // fTestTime
-#	endif // dTermAParTestProjExeTestTime
+#	endif // dTermAParTestExeTestTime
 #	if 1
 // datadef
 static auto cExamArgHelpText = format(
@@ -206,7 +206,7 @@ static auto cExamArgHelpText = format(
 	dTermAParProjNameExe
 ); // cExamArgHelpText
 // actions
-#	endif // dTermAParTestProjExeExamArg
+#	endif // dTermAParTestExeExamArg
 #	if 1
 // datadef
 static auto cExamOptHelpText = format(
@@ -231,7 +231,7 @@ static auto cExamOptHelpText = format(
 	dTermAParProjNameExe
 ); // cExamOptHelpText
 // actions
-#	endif // dTermAParTestProjExeExamOpt
+#	endif // dTermAParTestExeExamOpt
 #	if 1
 // datadef
 static auto cExamCmdHelpText = format(
@@ -267,7 +267,7 @@ static auto cExamCmdHelpTextCmd = format(
 	dTermAParProjNameExe
 ); // cExamCmdHelpTextCmd
 // actions
-#	endif // dTermAParTestProjExeExamCmd
+#	endif // dTermAParTestExeExamCmd
 // datadef
 static auto cHelpText = format(
 	R"({0}
@@ -317,5 +317,5 @@ int main(int vArgC, char *vArgV[])
 	pExamCmdParserCmd->fSetOpt("o opt", "val");
 	vArgParser.fParse(vArgC, vArgV);
 } // main
-#endif // dTermAParMakeProjExe
+#endif // dTermAParMakeExe
 #endif // dTermAParMainCxx
