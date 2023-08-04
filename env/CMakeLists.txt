@@ -6,7 +6,7 @@ include(dCmake.dir/dHelp.dir/fOpt.cmake)
 include(dCmake.dir/dHelp.dir/fPack.cmake)
 # proj
 project(TermAPar
-  VERSION 4.2.0
+  VERSION 4.2.1
   DESCRIPTION
   "single-header-only-library for cli argument parsing in cxx"
   ) # project
@@ -42,7 +42,7 @@ set(vFdirDstBins "${vFdirDstRoot}/bin")
 set(vFdirDstLibs "${vFdirDstRoot}/lib")
 set(vFdirDstHead "${vFdirDstRoot}/include")
 set(CMAKE_PREFIX_PATH "${vFdirDstRoot}" CACHE PATH "destination prefix" FORCE)
-set(CMAKE_INSTALL_PREFIX "${vFdirDstRoot}" CACHE PATH "install prefix" FORCE)
+set(CMAKE_INSTALL_PREFIX "" CACHE PATH "install prefix" FORCE)
 # conf
 set(oProjConfPick "Work")
 set(vProjConfList "Work;Play;Dist;")
